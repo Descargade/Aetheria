@@ -1,0 +1,32 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "4v13Z9R7hCe4qqXrTX9E5"
+uri = "file://artifacts/aetheria/public/images/products/jacket-1.png"
+type = "image"
+title = "Aetheria black techwear jacket"
+
+[[generated]]
+id = "0iEVCDJdW9GKpWANLAzxN"
+uri = "file://artifacts/aetheria/public/images/products/pants-1.png"
+type = "image"
+title = "Aetheria silver cargo pants"
+
+[[generated]]
+id = "QH-DREVB_4lfWAOhpP7FX"
+uri = "file://artifacts/aetheria/public/images/products/hoodie-1.png"
+type = "image"
+title = "Aetheria electric blue hoodie"
+
+[[generated]]
+id = "pUHpqnWXnOvF4qZdkd1Gg"
+uri = "file://artifacts/aetheria/public/images/products/acc-1.png"
+type = "image"
+title = "Aetheria techwear accessories"
+
+[[generated]]
+id = "CJzAdO3XsngxR1e3bNene"
+uri = "file://artifacts/aetheria/public/images/hero.png"
+type = "image"
+title = "Aetheria hero banner"

@@ -1,0 +1,464 @@
+DESARROLA UNA TIENDA ONLINE PROFESIONAL COMPLETA PARA MI MARCA DE ROPA "AETHERIA".
+
+IMPORTANTE:
+
+* Todo el proyecto debe estar completamente en español.
+* Todos los precios deben mostrarse en pesos argentinos (ARS $).
+* Diseño premium, moderno, elegante, minimalista y orientado a moda urbana y streetwear.
+* Responsive 100% (Desktop, Tablet y Mobile).
+* Código limpio, escalable y profesional.
+* SEO optimizado.
+* Excelente estructura DOM.
+* Excelente accesibilidad.
+* Animaciones suaves y modernas.
+* Utilizar las mejores prácticas de UI/UX.
+* Implementar modo claro y modo oscuro (Dark Mode / Light Mode) con cambio dinámico.
+* Integrar un logo profesional para la marca AETHERIA en la cabecera.
+* Utilizar componentes reutilizables.
+* Simular un entorno de e-commerce real y profesional.
+
+====================================
+IDENTIDAD DE MARCA
+==================
+
+Nombre de la marca: AETHERIA
+
+Concepto visual:
+
+* Moda urbana moderna.
+* Estética premium.
+* Estilo minimalista.
+* Diseño elegante.
+* Inspiración tecnológica y futurista.
+* Experiencia similar a marcas modernas de ropa de alta gama.
+
+Paleta sugerida:
+
+* Negro profundo.
+* Blanco.
+* Gris oscuro.
+* Gris claro.
+* Detalles con color violeta, azul eléctrico o plateado.
+
+Tipografías modernas y premium.
+
+====================================
+PÁGINA PRINCIPAL (TIENDA)
+=========================
+
+HEADER
+
+* Logo AETHERIA.
+* Nombre de la marca.
+* Menú responsive.
+* Buscador global.
+* Icono de favoritos.
+* Icono de carrito.
+* Selector de modo oscuro/claro.
+* Menú hamburguesa para móviles.
+
+SECCIÓN HERO
+
+* Imagen destacada de moda.
+* Carrusel visual moderno.
+* Banners promocionales administrables.
+* Botones de llamada a la acción.
+* Animaciones suaves.
+
+====================================
+CARRUSEL DE CATEGORÍAS
+======================
+
+Crear un carrusel moderno de categorías administrables.
+
+Ejemplos:
+
+* Remeras
+* Camisas
+* Buzos
+* Camperas
+* Pantalones
+* Jeans
+* Accesorios
+* Gorras
+* Mochilas
+
+Cada categoría debe:
+
+* Tener imagen.
+* Tener nombre.
+* Ser editable desde el panel de administración.
+
+====================================
+SECCIÓN OFERTAS Y CUPONES
+=========================
+
+Debajo del carrusel de categorías.
+
+Mostrar:
+
+* Promociones activas.
+* Cupones activos.
+* Descuentos temporales.
+* Beneficios especiales.
+
+Esta sección debe estar completamente conectada con el panel administrativo.
+
+====================================
+CATÁLOGO DE PRODUCTOS
+=====================
+
+Mostrar productos en tarjetas modernas.
+
+Cada producto debe incluir:
+
+* Imagen principal.
+* Varias imágenes secundarias.
+* Nombre.
+* Categoría.
+* Precio original.
+* Precio promocional.
+* Precio especial según método de pago.
+* Porcentaje de descuento.
+* Stock disponible.
+* Talles disponibles.
+* Colores disponibles.
+* Botón comprar.
+* Botón agregar al carrito.
+* Botón favoritos (corazón).
+* Indicador de oferta.
+* Indicador de nuevo producto.
+
+====================================
+FILTROS AVANZADOS
+=================
+
+Implementar filtros dinámicos conectados a los datos reales.
+
+Filtrar por:
+
+* Nombre.
+* Categoría.
+* Precio mínimo.
+* Precio máximo.
+* Color.
+* Talle.
+* Disponibilidad.
+* Productos en oferta.
+* Productos destacados.
+
+Todo debe actualizarse en tiempo real.
+
+====================================
+FAVORITOS
+=========
+
+Implementar sistema de favoritos.
+
+* Corazón en cada producto.
+* Guardar productos favoritos.
+* Vista exclusiva de favoritos.
+* Persistencia de datos.
+* Posibilidad de eliminar favoritos.
+
+====================================
+CARRITO DE COMPRAS
+==================
+
+Implementar carrito funcional completo.
+
+Funciones:
+
+* Agregar productos.
+* Eliminar productos.
+* Modificar cantidades.
+* Calcular subtotal.
+* Calcular descuentos.
+* Aplicar cupones.
+* Calcular envío.
+* Calcular total final.
+
+====================================
+ENVÍOS
+======
+
+Permitir elegir:
+
+* Retiro en local.
+* Envío a domicilio.
+
+El sistema debe permitir:
+
+* Métodos configurables desde administración.
+* Costos configurables.
+* Zonas de envío configurables.
+* Tiempo estimado de entrega.
+
+====================================
+MÉTODOS DE PAGO
+===============
+
+Únicamente:
+
+* Transferencia bancaria.
+* Efectivo.
+
+Debe permitir:
+
+* Aplicar descuentos específicos por método.
+* Mostrar beneficios.
+* Administrar desde panel administrativo.
+
+====================================
+CHECKOUT
+========
+
+Formulario profesional de compra.
+
+Datos:
+
+* Nombre.
+* Apellido.
+* Teléfono.
+* Correo.
+* Dirección.
+* Ciudad.
+* Provincia.
+* Código postal.
+
+Resumen del pedido.
+
+Confirmación de compra.
+
+====================================
+CONTACTO
+========
+
+Formulario simple.
+
+Campos:
+
+* Nombre.
+* Correo.
+* Mensaje.
+
+Botones:
+
+* Enviar por correo.
+* Enviar por WhatsApp.
+
+====================================
+REDES SOCIALES
+==============
+
+Footer moderno.
+
+Mostrar:
+
+Instagram:
+@aetheria_arg
+
+Icono oficial de Instagram.
+
+Botón para visitar perfil.
+
+====================================
+PANEL DE ADMINISTRACIÓN
+=======================
+
+Crear un portal administrativo profesional independiente.
+
+Acceso protegido mediante login.
+
+Diseño tipo dashboard moderno.
+
+Menú lateral responsive.
+
+====================================
+MÓDULO: GESTIÓN DE VENTAS
+=========================
+
+Submenús:
+
+1. Listado de ventas.
+2. Agregar venta manual.
+3. Ver clientes.
+4. Métricas y estadísticas.
+5. Confirmación de pagos.
+6. Gestión de métodos de pago.
+7. Gestión de envíos.
+8. Historial de operaciones.
+
+Características:
+
+* Ver pedidos.
+* Editar pedidos.
+* Confirmar ventas.
+* Cancelar ventas.
+* Cambiar estados.
+* Buscar ventas.
+* Filtrar ventas.
+
+Estados:
+
+* Pendiente.
+* Confirmado.
+* Pagado.
+* Enviado.
+* Entregado.
+* Cancelado.
+
+====================================
+MÓDULO: PROMOCIONES
+===================
+
+Permitir:
+
+* Crear ofertas.
+* Editar ofertas.
+* Eliminar ofertas.
+* Crear cupones.
+* Editar cupones.
+* Eliminar cupones.
+
+Configurar:
+
+* Fecha inicio.
+* Fecha fin.
+* Descuento porcentual.
+* Descuento fijo.
+* Aplicación por categoría.
+* Aplicación por producto.
+
+====================================
+MÓDULO: PRODUCTOS
+=================
+
+SUBMENÚ CATEGORÍAS
+
+* Crear categorías.
+* Editar categorías.
+* Eliminar categorías.
+* Imagen de categoría.
+
+SUBMENÚ PRODUCTOS
+
+* Crear producto.
+* Editar producto.
+* Eliminar producto.
+* Duplicar producto.
+
+Datos del producto:
+
+* Nombre.
+* Código SKU.
+* Descripción corta.
+* Descripción completa.
+* Categoría.
+* Variantes.
+* Colores.
+* Talles.
+* Imágenes múltiples.
+* Stock.
+* Precio base.
+* Precio promocional.
+* Precio por método de pago.
+* Producto destacado.
+* Producto nuevo.
+
+====================================
+ADMINISTRACIÓN DE STOCK
+=======================
+
+Permitir:
+
+* Stock por talle.
+* Stock por color.
+* Stock por variante.
+
+Alertas:
+
+* Stock bajo.
+* Stock agotado.
+
+Notificaciones automáticas.
+
+====================================
+CONFIGURACIÓN AVANZADA
+======================
+
+1. Notificaciones de stock.
+2. Aumento masivo de precios.
+3. Reducción masiva de precios.
+4. Cambio porcentual global.
+5. Configuración de moneda.
+6. Configuración de descuentos.
+7. Configuración de impuestos.
+8. Configuración de envíos.
+9. Configuración de métodos de pago.
+
+====================================
+MÉTRICAS Y DASHBOARD
+====================
+
+Mostrar:
+
+* Ventas del día.
+* Ventas del mes.
+* Productos más vendidos.
+* Productos con menor stock.
+* Ingresos.
+* Clientes registrados.
+* Conversión de ventas.
+* Promedio por pedido.
+
+Utilizar gráficos modernos.
+
+====================================
+BASE DE DATOS
+=============
+
+Diseñar una estructura profesional.
+
+Tablas:
+
+* Usuarios
+* Administradores
+* Productos
+* Categorías
+* Variantes
+* Colores
+* Talles
+* Stock
+* Pedidos
+* Clientes
+* Cupones
+* Promociones
+* Métodos de pago
+* Métodos de envío
+* Favoritos
+
+====================================
+TECNOLOGÍA
+==========
+
+Utilizar tecnologías modernas.
+
+* Frontend moderno.
+* Backend escalable.
+* Base de datos estructurada.
+* Componentes reutilizables.
+* Arquitectura modular.
+* Código mantenible.
+* Buen rendimiento.
+* Optimización para SEO.
+* Optimización para velocidad.
+* Lazy Loading de imágenes.
+* Validaciones completas.
+* Manejo de errores profesional.
+
+====================================
+RESULTADO ESPERADO
+==================
+
+Quiero una tienda online de ropa profesional, visualmente impactante, moderna, elegante y completamente funcional, con experiencia similar a las mejores tiendas de moda actuales, incluyendo un panel administrativo avanzado para gestionar ventas, productos, promociones, stock, clientes, envíos y métricas desde un único lugar.

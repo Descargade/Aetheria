@@ -1,22 +1,29 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AETHERIA E-Commerce API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: categories
+  - name: products
+  - name: cart
+  - name: favorites
+  - name: orders
+  - name: coupons
+  - name: promotions
+  - name: shipping
+  - name: payments
+  - name: admin
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +31,1612 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── CATEGORIES ────────────────────────────────────────────────────────────
+  /categories:
+    get:
+      operationId: getCategories
+      tags: [categories]
+      summary: List all categories
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      operationId: createCategory
+      tags: [categories]
+      summary: Create category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /categories/{id}:
+    get:
+      operationId: getCategory
+      tags: [categories]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    patch:
+      operationId: updateCategory
+      tags: [categories]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      operationId: deleteCategory
+      tags: [categories]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── PRODUCTS ──────────────────────────────────────────────────────────────
+  /products:
+    get:
+      operationId: getProducts
+      tags: [products]
+      summary: List products with filters
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: minPrice
+          in: query
+          schema:
+            type: ["number", "null"]
+        - name: maxPrice
+          in: query
+          schema:
+            type: ["number", "null"]
+        - name: color
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: size
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: inStock
+          in: query
+          schema:
+            type: ["boolean", "null"]
+        - name: onSale
+          in: query
+          schema:
+            type: ["boolean", "null"]
+        - name: featured
+          in: query
+          schema:
+            type: ["boolean", "null"]
+        - name: isNew
+          in: query
+          schema:
+            type: ["boolean", "null"]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/featured:
+    get:
+      operationId: getFeaturedProducts
+      tags: [products]
+      summary: Get featured products
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/new-arrivals:
+    get:
+      operationId: getNewArrivals
+      tags: [products]
+      summary: Get new arrivals
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/on-sale:
+    get:
+      operationId: getOnSaleProducts
+      tags: [products]
+      summary: Get on-sale products
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── FAVORITES ─────────────────────────────────────────────────────────────
+  /favorites:
+    get:
+      operationId: getFavorites
+      tags: [favorites]
+      summary: Get all favorites (by session)
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Favorite"
+    post:
+      operationId: addFavorite
+      tags: [favorites]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FavoriteInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Favorite"
+
+  /favorites/{id}:
+    delete:
+      operationId: removeFavorite
+      tags: [favorites]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── CART ──────────────────────────────────────────────────────────────────
+  /cart:
+    get:
+      operationId: getCart
+      tags: [cart]
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    post:
+      operationId: addToCart
+      tags: [cart]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartItemInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/{itemId}:
+    patch:
+      operationId: updateCartItem
+      tags: [cart]
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartItemUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    delete:
+      operationId: removeFromCart
+      tags: [cart]
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/clear:
+    delete:
+      operationId: clearCart
+      tags: [cart]
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Cleared
+
+  /cart/apply-coupon:
+    post:
+      operationId: applyCoupon
+      tags: [cart]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CouponApply"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CouponValidation"
+
+  # ─── ORDERS ────────────────────────────────────────────────────────────────
+  /orders:
+    get:
+      operationId: getOrders
+      tags: [orders]
+      summary: List orders (admin)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      tags: [orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderStatusUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  # ─── COUPONS ────────────────────────────────────────────────────────────────
+  /coupons:
+    get:
+      operationId: getCoupons
+      tags: [coupons]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Coupon"
+    post:
+      operationId: createCoupon
+      tags: [coupons]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CouponInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Coupon"
+
+  /coupons/{id}:
+    patch:
+      operationId: updateCoupon
+      tags: [coupons]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CouponUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Coupon"
+    delete:
+      operationId: deleteCoupon
+      tags: [coupons]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── PROMOTIONS ────────────────────────────────────────────────────────────
+  /promotions:
+    get:
+      operationId: getPromotions
+      tags: [promotions]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Promotion"
+    post:
+      operationId: createPromotion
+      tags: [promotions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromotionInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Promotion"
+
+  /promotions/active:
+    get:
+      operationId: getActivePromotions
+      tags: [promotions]
+      summary: Get currently active promotions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Promotion"
+
+  /promotions/{id}:
+    patch:
+      operationId: updatePromotion
+      tags: [promotions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromotionUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Promotion"
+    delete:
+      operationId: deletePromotion
+      tags: [promotions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── SHIPPING METHODS ──────────────────────────────────────────────────────
+  /shipping-methods:
+    get:
+      operationId: getShippingMethods
+      tags: [shipping]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShippingMethod"
+    post:
+      operationId: createShippingMethod
+      tags: [shipping]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShippingMethodInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShippingMethod"
+
+  /shipping-methods/{id}:
+    patch:
+      operationId: updateShippingMethod
+      tags: [shipping]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShippingMethodUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShippingMethod"
+    delete:
+      operationId: deleteShippingMethod
+      tags: [shipping]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── PAYMENT METHODS ───────────────────────────────────────────────────────
+  /payment-methods:
+    get:
+      operationId: getPaymentMethods
+      tags: [payments]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentMethod"
+    post:
+      operationId: createPaymentMethod
+      tags: [payments]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentMethodInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethod"
+
+  /payment-methods/{id}:
+    patch:
+      operationId: updatePaymentMethod
+      tags: [payments]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentMethodUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethod"
+    delete:
+      operationId: deletePaymentMethod
+      tags: [payments]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── ADMIN ─────────────────────────────────────────────────────────────────
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminCredentials"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSession"
+
+  /admin/dashboard:
+    get:
+      operationId: getDashboardMetrics
+      tags: [admin]
+      summary: Admin dashboard summary metrics
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardMetrics"
+
+  /admin/top-products:
+    get:
+      operationId: getTopProducts
+      tags: [admin]
+      summary: Best-selling products
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TopProduct"
+
+  /admin/low-stock:
+    get:
+      operationId: getLowStockProducts
+      tags: [admin]
+      summary: Products with low stock
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /admin/sales-by-day:
+    get:
+      operationId: getSalesByDay
+      tags: [admin]
+      summary: Daily sales for the last 30 days
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DailySales"
+
+  /admin/bulk-price-update:
+    post:
+      operationId: bulkPriceUpdate
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkPriceUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkUpdateResult"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    # ── Category ────────────────────────────────────────────────────────────
+    Category:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: ["string", "null"]
+        image:
+          type: ["string", "null"]
+        active:
+          type: boolean
+
+    CategoryInput:
+      type: object
+      required: [name, slug]
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: ["string", "null"]
+        image:
+          type: ["string", "null"]
+        active:
+          type: boolean
+
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: ["string", "null"]
+        image:
+          type: ["string", "null"]
+        active:
+          type: boolean
+
+    # ── Product ─────────────────────────────────────────────────────────────
+    Product:
+      type: object
+      required: [id, name, price, categoryId]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sku:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        shortDescription:
+          type: ["string", "null"]
+        categoryId:
+          type: integer
+        categoryName:
+          type: ["string", "null"]
+        price:
+          type: number
+        salePrice:
+          type: ["number", "null"]
+        images:
+          type: array
+          items:
+            type: string
+        sizes:
+          type: array
+          items:
+            type: string
+        colors:
+          type: array
+          items:
+            type: string
+        stock:
+          type: integer
+        featured:
+          type: boolean
+        isNew:
+          type: boolean
+        active:
+          type: boolean
+
+    ProductInput:
+      type: object
+      required: [name, price, categoryId]
+      properties:
+        name:
+          type: string
+        sku:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        shortDescription:
+          type: ["string", "null"]
+        categoryId:
+          type: integer
+        price:
+          type: number
+        salePrice:
+          type: ["number", "null"]
+        images:
+          type: array
+          items:
+            type: string
+        sizes:
+          type: array
+          items:
+            type: string
+        colors:
+          type: array
+          items:
+            type: string
+        stock:
+          type: integer
+        featured:
+          type: boolean
+        isNew:
+          type: boolean
+        active:
+          type: boolean
+
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        sku:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        shortDescription:
+          type: ["string", "null"]
+        categoryId:
+          type: integer
+        price:
+          type: number
+        salePrice:
+          type: ["number", "null"]
+        images:
+          type: array
+          items:
+            type: string
+        sizes:
+          type: array
+          items:
+            type: string
+        colors:
+          type: array
+          items:
+            type: string
+        stock:
+          type: integer
+        featured:
+          type: boolean
+        isNew:
+          type: boolean
+        active:
+          type: boolean
+
+    # ── Favorite ─────────────────────────────────────────────────────────────
+    Favorite:
+      type: object
+      required: [id, productId, sessionId]
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        sessionId:
+          type: string
+        product:
+          $ref: "#/components/schemas/Product"
+
+    FavoriteInput:
+      type: object
+      required: [productId, sessionId]
+      properties:
+        productId:
+          type: integer
+        sessionId:
+          type: string
+
+    # ── Cart ─────────────────────────────────────────────────────────────────
+    Cart:
+      type: object
+      required: [sessionId, items, subtotal, total]
+      properties:
+        sessionId:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+        subtotal:
+          type: number
+        discount:
+          type: number
+        shippingCost:
+          type: number
+        total:
+          type: number
+        couponCode:
+          type: ["string", "null"]
+
+    CartItem:
+      type: object
+      required: [id, productId, quantity, price]
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        product:
+          $ref: "#/components/schemas/Product"
+        quantity:
+          type: integer
+        selectedSize:
+          type: ["string", "null"]
+        selectedColor:
+          type: ["string", "null"]
+        price:
+          type: number
+
+    CartItemInput:
+      type: object
+      required: [sessionId, productId, quantity]
+      properties:
+        sessionId:
+          type: string
+        productId:
+          type: integer
+        quantity:
+          type: integer
+        selectedSize:
+          type: ["string", "null"]
+        selectedColor:
+          type: ["string", "null"]
+
+    CartItemUpdate:
+      type: object
+      required: [quantity]
+      properties:
+        quantity:
+          type: integer
+
+    CouponApply:
+      type: object
+      required: [sessionId, code]
+      properties:
+        sessionId:
+          type: string
+        code:
+          type: string
+
+    CouponValidation:
+      type: object
+      required: [valid]
+      properties:
+        valid:
+          type: boolean
+        coupon:
+          $ref: "#/components/schemas/Coupon"
+        message:
+          type: ["string", "null"]
+
+    # ── Order ─────────────────────────────────────────────────────────────────
+    Order:
+      type: object
+      required: [id, status, total, createdAt]
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+          enum: [pendiente, confirmado, pagado, enviado, entregado, cancelado]
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        province:
+          type: string
+        postalCode:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        subtotal:
+          type: number
+        discount:
+          type: number
+        shippingCost:
+          type: number
+        total:
+          type: number
+        couponCode:
+          type: ["string", "null"]
+        shippingMethodId:
+          type: ["integer", "null"]
+        paymentMethodId:
+          type: ["integer", "null"]
+        paymentMethodName:
+          type: ["string", "null"]
+        shippingMethodName:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    OrderItem:
+      type: object
+      required: [id, productId, quantity, price]
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productName:
+          type: string
+        quantity:
+          type: integer
+        selectedSize:
+          type: ["string", "null"]
+        selectedColor:
+          type: ["string", "null"]
+        price:
+          type: number
+
+    OrderInput:
+      type: object
+      required: [sessionId, firstName, lastName, email, phone, address, city, province, postalCode, paymentMethodId, shippingMethodId]
+      properties:
+        sessionId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        province:
+          type: string
+        postalCode:
+          type: string
+        paymentMethodId:
+          type: integer
+        shippingMethodId:
+          type: integer
+        couponCode:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    OrderStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [pendiente, confirmado, pagado, enviado, entregado, cancelado]
+
+    # ── Coupon ────────────────────────────────────────────────────────────────
+    Coupon:
+      type: object
+      required: [id, code, discountType, discountValue]
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        description:
+          type: ["string", "null"]
+        discountType:
+          type: string
+          enum: [percentage, fixed]
+        discountValue:
+          type: number
+        minPurchase:
+          type: ["number", "null"]
+        active:
+          type: boolean
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+        usageLimit:
+          type: ["integer", "null"]
+        usageCount:
+          type: integer
+
+    CouponInput:
+      type: object
+      required: [code, discountType, discountValue]
+      properties:
+        code:
+          type: string
+        description:
+          type: ["string", "null"]
+        discountType:
+          type: string
+          enum: [percentage, fixed]
+        discountValue:
+          type: number
+        minPurchase:
+          type: ["number", "null"]
+        active:
+          type: boolean
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+        usageLimit:
+          type: ["integer", "null"]
+
+    CouponUpdate:
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: ["string", "null"]
+        discountType:
+          type: string
+          enum: [percentage, fixed]
+        discountValue:
+          type: number
+        minPurchase:
+          type: ["number", "null"]
+        active:
+          type: boolean
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+        usageLimit:
+          type: ["integer", "null"]
+
+    # ── Promotion ────────────────────────────────────────────────────────────
+    Promotion:
+      type: object
+      required: [id, title, discountType, discountValue]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        discountType:
+          type: string
+          enum: [percentage, fixed]
+        discountValue:
+          type: number
+        categoryId:
+          type: ["integer", "null"]
+        productId:
+          type: ["integer", "null"]
+        active:
+          type: boolean
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+        badge:
+          type: ["string", "null"]
+
+    PromotionInput:
+      type: object
+      required: [title, discountType, discountValue]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        discountType:
+          type: string
+          enum: [percentage, fixed]
+        discountValue:
+          type: number
+        categoryId:
+          type: ["integer", "null"]
+        productId:
+          type: ["integer", "null"]
+        active:
+          type: boolean
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+        badge:
+          type: ["string", "null"]
+
+    PromotionUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        discountType:
+          type: string
+        discountValue:
+          type: number
+        categoryId:
+          type: ["integer", "null"]
+        productId:
+          type: ["integer", "null"]
+        active:
+          type: boolean
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+        badge:
+          type: ["string", "null"]
+
+    # ── ShippingMethod ────────────────────────────────────────────────────────
+    ShippingMethod:
+      type: object
+      required: [id, name, price]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        price:
+          type: number
+        estimatedDays:
+          type: ["string", "null"]
+        active:
+          type: boolean
+
+    ShippingMethodInput:
+      type: object
+      required: [name, price]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        price:
+          type: number
+        estimatedDays:
+          type: ["string", "null"]
+        active:
+          type: boolean
+
+    ShippingMethodUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        price:
+          type: number
+        estimatedDays:
+          type: ["string", "null"]
+        active:
+          type: boolean
+
+    # ── PaymentMethod ─────────────────────────────────────────────────────────
+    PaymentMethod:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        discount:
+          type: number
+        active:
+          type: boolean
+        instructions:
+          type: ["string", "null"]
+
+    PaymentMethodInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        discount:
+          type: number
+        active:
+          type: boolean
+        instructions:
+          type: ["string", "null"]
+
+    PaymentMethodUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        discount:
+          type: number
+        active:
+          type: boolean
+        instructions:
+          type: ["string", "null"]
+
+    # ── Admin ─────────────────────────────────────────────────────────────────
+    AdminCredentials:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AdminSession:
+      type: object
+      required: [success, token]
+      properties:
+        success:
+          type: boolean
+        token:
+          type: string
+        username:
+          type: string
+
+    DashboardMetrics:
+      type: object
+      required: [dailySales, monthlySales, totalRevenue, totalOrders, totalProducts, totalCustomers, averageOrderValue, conversionRate]
+      properties:
+        dailySales:
+          type: number
+        monthlySales:
+          type: number
+        totalRevenue:
+          type: number
+        totalOrders:
+          type: integer
+        totalProducts:
+          type: integer
+        totalCustomers:
+          type: integer
+        averageOrderValue:
+          type: number
+        conversionRate:
+          type: number
+        pendingOrders:
+          type: integer
+        lowStockCount:
+          type: integer
+
+    TopProduct:
+      type: object
+      required: [productId, name, totalSold, revenue]
+      properties:
+        productId:
+          type: integer
+        name:
+          type: string
+        totalSold:
+          type: integer
+        revenue:
+          type: number
+        image:
+          type: ["string", "null"]
+
+    DailySales:
+      type: object
+      required: [date, total, orders]
+      properties:
+        date:
+          type: string
+        total:
+          type: number
+        orders:
+          type: integer
+
+    BulkPriceUpdate:
+      type: object
+      required: [type, value]
+      properties:
+        type:
+          type: string
+          enum: [increase_percentage, decrease_percentage, increase_fixed, decrease_fixed]
+        value:
+          type: number
+        categoryId:
+          type: ["integer", "null"]
+
+    BulkUpdateResult:
+      type: object
+      required: [updated]
+      properties:
+        updated:
+          type: integer
+        message:
+          type: string
