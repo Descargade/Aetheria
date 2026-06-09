@@ -48,7 +48,8 @@ router.get("/", async (req, res) => {
   const { categoryId, search, minPrice, maxPrice, color, size, inStock, onSale, featured, isNew } = req.query;
   const conditions: ReturnType<typeof eq>[] = [eq(productsTable.active, true)];
 
-  if (categoryId) conditions.push(eq(productsTable.categoryId, Number(categoryId)));
+  const categoryIdNum = categoryId ? Number(categoryId) : NaN;
+  if (categoryId && !isNaN(categoryIdNum)) conditions.push(eq(productsTable.categoryId, categoryIdNum));
   if (minPrice) conditions.push(gte(productsTable.price, String(minPrice)));
   if (maxPrice) conditions.push(lte(productsTable.price, String(maxPrice)));
   if (inStock === "true") conditions.push(gte(productsTable.stock, 1));

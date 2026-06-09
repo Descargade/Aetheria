@@ -1,11 +1,12 @@
 import { Link } from "wouter";
-import { ShoppingBag, Heart, Search, Menu, Moon, Sun, X } from "lucide-react";
+import { ShoppingBag, Heart, Menu, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import { useSession } from "@/hooks/use-session";
 import { useGetCart, useGetFavorites, getGetCartQueryKey, getGetFavoritesQueryKey } from "@workspace/api-client-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { SearchBar } from "@/components/layout/SearchBar";
 
 export function Header() {
   const { theme, setTheme } = useTheme();
@@ -79,10 +80,9 @@ export function Header() {
 
         {/* Icons */}
         <div className="flex items-center gap-2 md:gap-4">
-          <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
-            <Search className="h-5 w-5" />
-            <span className="sr-only">Buscar</span>
-          </Button>
+          <div className="hidden sm:block">
+            <SearchBar />
+          </div>
 
           <Button 
             variant="ghost" 
