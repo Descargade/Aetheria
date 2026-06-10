@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { productsTable, categoriesTable } from "@workspace/db";
-import { eq, and, gte, lte, ilike, isNotNull, sql } from "drizzle-orm";
+import {
+  productsTable, categoriesTable,
+  variantsTable, variantImagesTable, variantSizesTable,
+  insertVariantSchema, insertVariantImageSchema,
+} from "@workspace/db";
+import { eq, and, gte, lte, ilike, isNotNull, sql, asc } from "drizzle-orm";
 
 const router = Router();
 
@@ -101,6 +105,46 @@ router.patch("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   await db.delete(productsTable).where(eq(productsTable.id, Number(req.params.id)));
   res.status(204).send();
+});
+
+router.get("/:id/variants", async (req, res) => {
+  const productId = Number(req.params.id);
+  if (isNaN(productId)) { res.status(400).json({ error: "Invalid id" }); return; }
+
+  const variants = await db
+    .select()
+    .from(variantsTable)
+    .where(eq(variantsTable.productId, productId))
+    .orderBy(asc(variantsTable.sortOrder));
+
+  const result = await Promise.all(
+    variants.map(async (v) => {
+      const images = await db
+        .select()
+        .from(variantImagesTable)
+        .where(eq(variantImagesTable.variantId, v.id))
+        .orderBy(asc(variantImagesTable.sortOrder));
+      const sizes = await db
+        .select()
+        .from(variantSizesTable)
+        .where(eq(variantSizesTable.variantId, v.id))
+        .orderBy(asc(variantSizesTable.size));
+      return { ...v, images, sizes };
+    })
+  );
+
+  res.json(result);
+});
+
+router.post("/:id/variants", async (req, res) => {
+  const productId = Number(req.params.id);
+  if (isNaN(productId)) { res.status(400).json({ error: "Invalid id" }); return; }
+
+  const parsed = insertVariantSchema.safeParse({ ...req.body, productId });
+  if (!parsed.success) { res.status(400).json({ error: parsed.error }); return; }
+
+  const [variant] = await db.insert(variantsTable).values(parsed.data).returning();
+  res.status(201).json({ ...variant, images: [], sizes: [] });
 });
 
 export default router;

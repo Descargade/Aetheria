@@ -25,6 +25,7 @@ import { AdminProducts } from "@/pages/admin/products";
 import { AdminCategories } from "@/pages/admin/categories";
 import { AdminPromotions } from "@/pages/admin/promotions";
 import { AdminConfig } from "@/pages/admin/config";
+import { AdminSizeGuides } from "@/pages/admin/size-guides";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,6 +92,9 @@ function Router() {
       </Route>
       <Route path="/admin/configuracion">
         <AdminGuard><AdminConfig /></AdminGuard>
+      </Route>
+      <Route path="/admin/guias-talles">
+        <AdminGuard><AdminSizeGuides /></AdminGuard>
       </Route>
 
       {/* Catch all */}

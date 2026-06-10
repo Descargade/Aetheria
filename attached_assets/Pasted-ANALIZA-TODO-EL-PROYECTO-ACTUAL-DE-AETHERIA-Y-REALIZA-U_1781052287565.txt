@@ -1,0 +1,313 @@
+ANALIZA TODO EL PROYECTO ACTUAL DE AETHERIA Y REALIZA UNA REFACTORIZACIÓN COMPLETA DE LOS MÓDULOS INDICADOS. NO QUIERO SOLUCIONES VISUALES O SIMULADAS. QUIERO FUNCIONALIDAD REAL, CONECTADA Y PREPARADA PARA PRODUCCIÓN.
+
+IMPORTANTE:
+
+* Revisar todo el código existente.
+* Detectar errores de lógica, arquitectura y base de datos.
+* Corregir cualquier funcionalidad incompleta.
+* Mantener compatibilidad con lo ya construido.
+* Mejorar UX y estructura de datos cuando sea necesario.
+* No crear funciones falsas o simuladas.
+* Todo debe quedar conectado al backend y base de datos real.
+
+=================================================
+CORRECCIÓN DE PRODUCTOS
+=======================
+
+Actualmente el sistema permite imágenes por URL.
+
+QUIERO QUE SE IMPLEMENTE:
+
+1. Subida de imágenes desde el equipo local.
+2. Almacenamiento real de imágenes.
+3. Gestión de archivos segura.
+4. Vista previa automática.
+5. Eliminación de imágenes.
+6. Reordenamiento de imágenes.
+7. Imagen principal.
+8. Múltiples imágenes por producto.
+
+NO QUIERO DEPENDER EXCLUSIVAMENTE DE URLS.
+
+El administrador debe poder:
+
+* Subir imágenes desde su computadora.
+* Seleccionar imágenes existentes.
+* Cambiar imágenes.
+* Eliminar imágenes.
+
+=================================================
+VARIANTES POR COLOR
+===================
+
+Necesito una estructura profesional para variantes.
+
+Ejemplo:
+
+Camisa Oxford
+
+Color Negro:
+
+* Imagen 1
+* Imagen 2
+* Imagen 3
+
+Color Blanco:
+
+* Imagen 4
+* Imagen 5
+* Imagen 6
+
+Color Azul:
+
+* Imagen 7
+* Imagen 8
+* Imagen 9
+
+Cada color debe tener:
+
+* Sus propias imágenes.
+* Su propio stock.
+* Sus propios talles.
+
+Cuando el cliente cambie de color:
+
+* Deben cambiar automáticamente las imágenes.
+* Debe actualizarse el stock.
+* Deben actualizarse los talles disponibles.
+
+NO debe mostrarse información incorrecta.
+
+=================================================
+CORRECCIÓN DE TALLES Y STOCK
+============================
+
+Actualmente el sistema no permite administrar correctamente stock por combinación.
+
+QUIERO UNA ESTRUCTURA COMO ESTA:
+
+Producto:
+Camisa Oxford
+
+Color Negro:
+
+* Talle S = 5 unidades
+* Talle M = 10 unidades
+* Talle L = 4 unidades
+
+Color Blanco:
+
+* Talle S = 2 unidades
+* Talle M = 7 unidades
+* Talle L = 0 unidades
+
+Color Azul:
+
+* Talle M = 3 unidades
+* Talle XL = 8 unidades
+
+Cada combinación Color + Talle debe tener:
+
+* Stock independiente.
+* Control independiente.
+* Descuento independiente (si se desea).
+* Disponibilidad independiente.
+
+Cuando un talle no tenga stock:
+
+* Debe mostrarse agotado.
+* No debe poder agregarse al carrito.
+
+=================================================
+MEJORA DE INTERFAZ DE VARIANTES
+===============================
+
+La interfaz actual de colores y talles es limitada.
+
+Rediseñarla completamente.
+
+Quiero:
+
+* Gestión visual clara.
+* Variantes agrupadas.
+* Tabla de stock.
+* Tabla de talles.
+* Tabla de colores.
+* Gestión rápida.
+
+Ejemplo:
+
+Color Negro
+S → 5
+M → 10
+L → 4
+
+Color Blanco
+S → 2
+M → 7
+L → 0
+
+Color Azul
+M → 3
+XL → 8
+
+=================================================
+CATEGORÍAS
+==========
+
+Actualmente las categorías solo admiten URLs.
+
+QUIERO:
+
+* Subir imágenes locales.
+* Cambiar imágenes.
+* Eliminar imágenes.
+* Vista previa.
+* Imagen de portada de categoría.
+
+Las categorías deben mostrarse correctamente en el carrusel principal.
+
+=================================================
+GUÍA DE TALLES
+==============
+
+Actualmente la guía de talles no funciona correctamente.
+
+Implementar sistema completo.
+
+Desde administración debe poder:
+
+* Crear guía de talles.
+* Editar guía de talles.
+* Eliminar guía de talles.
+* Asignar guía a productos.
+* Asignar guía a categorías.
+
+La guía debe admitir:
+
+* Tabla personalizada.
+* Medidas.
+* Descripciones.
+* Imágenes.
+* Instrucciones.
+
+En la ficha del producto debe existir:
+
+Botón:
+"Ver guía de talles"
+
+que abra un modal profesional.
+
+=================================================
+SISTEMA DE ENVÍOS
+=================
+
+Actualmente el envío es básico.
+
+QUIERO INTEGRACIÓN REAL.
+
+Trabajo con CORREO ARGENTINO.
+
+Implementar:
+
+1. Cotización automática.
+2. Cálculo automático.
+3. Integración mediante API oficial.
+4. Cálculo según:
+
+   * Código postal origen.
+   * Código postal destino.
+   * Peso.
+   * Dimensiones.
+   * Cantidad de productos.
+
+El cliente debe ver:
+
+* Precio real.
+* Tiempo estimado.
+* Método seleccionado.
+
+=================================================
+RETIRO SIN COSTO
+================
+
+Agregar método:
+
+"Retiro en domicilio/local"
+
+Características:
+
+* Costo $0.
+* Seleccionable durante checkout.
+* Visible en administración.
+* Configurable.
+
+=================================================
+MÚLTIPLES MÉTODOS DE ENVÍO
+==========================
+
+El sistema debe quedar preparado para:
+
+* Correo Argentino.
+* Andreani.
+* OCA.
+* Envío personalizado.
+* Retiro en local.
+
+Los métodos deben poder:
+
+* Activarse.
+* Desactivarse.
+* Configurarse.
+
+Todo desde administración.
+
+=================================================
+CONEXIONES REALES
+=================
+
+NO QUIERO FUNCIONES LOCALES SIMULADAS.
+
+Todo debe quedar conectado:
+
+* Backend real.
+* Base de datos real.
+* API real.
+* Persistencia real.
+
+Revisar todas las funciones que actualmente usan datos mock, temporales o simulados.
+
+Reemplazarlas por lógica funcional.
+
+=================================================
+BASE DE DATOS
+=============
+
+Revisar estructura actual.
+
+Si es necesario:
+
+* Crear nuevas tablas.
+* Crear relaciones.
+* Optimizar índices.
+
+Agregar entidades para:
+
+* Variantes.
+* Colores.
+* Talles.
+* Stock por variante.
+* Imágenes por variante.
+* Guías de talles.
+* Métodos de envío.
+* Tarifas de envío.
+
+=================================================
+OBJETIVO FINAL
+==============
+
+Quiero que AETHERIA funcione como una tienda profesional real.
+
+El administrador debe poder gestionar productos complejos con variantes de color y talle, imágenes asociadas a cada color, stock independiente por variante, guía de talles funcional, categorías con imágenes propias y cálculo automático de envíos mediante Correo Argentino.
+
+No quiero implementaciones visuales falsas ni simulaciones. Todo debe quedar conectado y preparado para producción real.

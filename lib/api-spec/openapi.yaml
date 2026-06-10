@@ -887,6 +887,268 @@ paths:
                 items:
                   $ref: "#/components/schemas/DailySales"
 
+  /storage/uploads/request-url:
+    post:
+      tags: [storage]
+      operationId: requestUploadUrl
+      summary: Request a presigned URL for file upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+
+  /products/{id}/variants:
+    get:
+      tags: [products]
+      operationId: getProductVariants
+      summary: Get all variants for a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Variant"
+    post:
+      tags: [products]
+      operationId: createVariant
+      summary: Create a variant for a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VariantInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Variant"
+
+  /variants/{id}:
+    put:
+      tags: [products]
+      operationId: updateVariant
+      summary: Update a variant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VariantUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Variant"
+    delete:
+      tags: [products]
+      operationId: deleteVariant
+      summary: Delete a variant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+
+  /variants/{id}/images:
+    post:
+      tags: [products]
+      operationId: addVariantImage
+      summary: Add an image to a variant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VariantImageInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VariantImage"
+
+  /variants/{id}/images/{imageId}:
+    delete:
+      tags: [products]
+      operationId: deleteVariantImage
+      summary: Delete a variant image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: imageId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+
+  /variants/{id}/sizes:
+    put:
+      tags: [products]
+      operationId: upsertVariantSizes
+      summary: Replace all sizes for a variant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/VariantSizeInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VariantSize"
+
+  /size-guides:
+    get:
+      tags: [size-guides]
+      operationId: getSizeGuides
+      summary: List size guides
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SizeGuide"
+    post:
+      tags: [size-guides]
+      operationId: createSizeGuide
+      summary: Create a size guide
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SizeGuideInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SizeGuide"
+
+  /size-guides/{id}:
+    get:
+      tags: [size-guides]
+      operationId: getSizeGuide
+      summary: Get a size guide
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SizeGuide"
+    put:
+      tags: [size-guides]
+      operationId: updateSizeGuide
+      summary: Update a size guide
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SizeGuideInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SizeGuide"
+    delete:
+      tags: [size-guides]
+      operationId: deleteSizeGuide
+      summary: Delete a size guide
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+
   /admin/bulk-price-update:
     post:
       operationId: bulkPriceUpdate
@@ -1640,3 +1902,162 @@ components:
           type: integer
         message:
           type: string
+
+    # ── Storage ───────────────────────────────────────────────────────────────
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+        size:
+          type: number
+        contentType:
+          type: string
+
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+        objectPath:
+          type: string
+        metadata:
+          type: object
+
+    # ── Variants ──────────────────────────────────────────────────────────────
+    VariantImage:
+      type: object
+      required: [id, variantId, objectPath, sortOrder]
+      properties:
+        id:
+          type: integer
+        variantId:
+          type: integer
+        objectPath:
+          type: string
+        sortOrder:
+          type: integer
+
+    VariantSize:
+      type: object
+      required: [id, variantId, size, stock]
+      properties:
+        id:
+          type: integer
+        variantId:
+          type: integer
+        size:
+          type: string
+        stock:
+          type: integer
+        active:
+          type: boolean
+
+    Variant:
+      type: object
+      required: [id, productId, colorName, colorHex]
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        colorName:
+          type: string
+        colorHex:
+          type: string
+        sortOrder:
+          type: integer
+        active:
+          type: boolean
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/VariantImage"
+        sizes:
+          type: array
+          items:
+            $ref: "#/components/schemas/VariantSize"
+
+    VariantInput:
+      type: object
+      required: [colorName, colorHex]
+      properties:
+        colorName:
+          type: string
+        colorHex:
+          type: string
+        sortOrder:
+          type: integer
+        active:
+          type: boolean
+
+    VariantUpdate:
+      type: object
+      properties:
+        colorName:
+          type: string
+        colorHex:
+          type: string
+        sortOrder:
+          type: integer
+        active:
+          type: boolean
+
+    VariantImageInput:
+      type: object
+      required: [objectPath]
+      properties:
+        objectPath:
+          type: string
+        sortOrder:
+          type: integer
+
+    VariantSizeInput:
+      type: object
+      required: [size, stock]
+      properties:
+        size:
+          type: string
+        stock:
+          type: integer
+        active:
+          type: boolean
+
+    # ── Size Guides ────────────────────────────────────────────────────────────
+    SizeGuide:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        tableData:
+          type: object
+        instructions:
+          type: ["string", "null"]
+        imageObjectPath:
+          type: ["string", "null"]
+        active:
+          type: boolean
+
+    SizeGuideInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        tableData:
+          type: object
+        instructions:
+          type: ["string", "null"]
+        imageObjectPath:
+          type: ["string", "null"]
+        active:
+          type: boolean

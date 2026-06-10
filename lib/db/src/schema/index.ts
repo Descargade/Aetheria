@@ -7,3 +7,5 @@ export * from "./coupons";
 export * from "./promotions";
 export * from "./shipping";
 export * from "./payments";
+export * from "./variants";
+export * from "./size_guides";

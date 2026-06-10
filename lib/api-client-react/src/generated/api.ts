@@ -60,7 +60,18 @@ import type {
   ShippingMethod,
   ShippingMethodInput,
   ShippingMethodUpdate,
-  TopProduct
+  SizeGuide,
+  SizeGuideInput,
+  TopProduct,
+  UploadUrlRequest,
+  UploadUrlResponse,
+  Variant,
+  VariantImage,
+  VariantImageInput,
+  VariantInput,
+  VariantSize,
+  VariantSizeInput,
+  VariantUpdate
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -3503,6 +3514,951 @@ export function useGetSalesByDay<TData = Awaited<ReturnType<typeof getSalesByDay
 
 
 
+
+export const getRequestUploadUrlUrl = () => {
+
+
+
+
+  return `/api/storage/uploads/request-url`
+}
+
+/**
+ * @summary Request a presigned URL for file upload
+ */
+export const requestUploadUrl = async (uploadUrlRequest: UploadUrlRequest, options?: RequestInit): Promise<UploadUrlResponse> => {
+
+  return customFetch<UploadUrlResponse>(getRequestUploadUrlUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      uploadUrlRequest,)
+  }
+);}
+
+
+
+
+export const getRequestUploadUrlMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,{data: BodyType<UploadUrlRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,{data: BodyType<UploadUrlRequest>}, TContext> => {
+
+const mutationKey = ['requestUploadUrl'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestUploadUrl>>, {data: BodyType<UploadUrlRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestUploadUrl(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestUploadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestUploadUrl>>>
+    export type RequestUploadUrlMutationBody = BodyType<UploadUrlRequest>
+    export type RequestUploadUrlMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Request a presigned URL for file upload
+ */
+export const useRequestUploadUrl = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,{data: BodyType<UploadUrlRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestUploadUrl>>,
+        TError,
+        {data: BodyType<UploadUrlRequest>},
+        TContext
+      > => {
+      return useMutation(getRequestUploadUrlMutationOptions(options));
+    }
+
+export const getGetProductVariantsUrl = (id: number,) => {
+
+
+
+
+  return `/api/products/${id}/variants`
+}
+
+/**
+ * @summary Get all variants for a product
+ */
+export const getProductVariants = async (id: number, options?: RequestInit): Promise<Variant[]> => {
+
+  return customFetch<Variant[]>(getGetProductVariantsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProductVariantsQueryKey = (id: number,) => {
+    return [
+    `/api/products/${id}/variants`
+    ] as const;
+    }
+
+
+export const getGetProductVariantsQueryOptions = <TData = Awaited<ReturnType<typeof getProductVariants>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProductVariants>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProductVariantsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProductVariants>>> = ({ signal }) => getProductVariants(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProductVariants>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProductVariantsQueryResult = NonNullable<Awaited<ReturnType<typeof getProductVariants>>>
+export type GetProductVariantsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get all variants for a product
+ */
+
+export function useGetProductVariants<TData = Awaited<ReturnType<typeof getProductVariants>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProductVariants>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProductVariantsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateVariantUrl = (id: number,) => {
+
+
+
+
+  return `/api/products/${id}/variants`
+}
+
+/**
+ * @summary Create a variant for a product
+ */
+export const createVariant = async (id: number,
+    variantInput: VariantInput, options?: RequestInit): Promise<Variant> => {
+
+  return customFetch<Variant>(getCreateVariantUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      variantInput,)
+  }
+);}
+
+
+
+
+export const getCreateVariantMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVariant>>, TError,{id: number;data: BodyType<VariantInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createVariant>>, TError,{id: number;data: BodyType<VariantInput>}, TContext> => {
+
+const mutationKey = ['createVariant'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createVariant>>, {id: number;data: BodyType<VariantInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createVariant(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateVariantMutationResult = NonNullable<Awaited<ReturnType<typeof createVariant>>>
+    export type CreateVariantMutationBody = BodyType<VariantInput>
+    export type CreateVariantMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a variant for a product
+ */
+export const useCreateVariant = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVariant>>, TError,{id: number;data: BodyType<VariantInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createVariant>>,
+        TError,
+        {id: number;data: BodyType<VariantInput>},
+        TContext
+      > => {
+      return useMutation(getCreateVariantMutationOptions(options));
+    }
+
+export const getUpdateVariantUrl = (id: number,) => {
+
+
+
+
+  return `/api/variants/${id}`
+}
+
+/**
+ * @summary Update a variant
+ */
+export const updateVariant = async (id: number,
+    variantUpdate: VariantUpdate, options?: RequestInit): Promise<Variant> => {
+
+  return customFetch<Variant>(getUpdateVariantUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      variantUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateVariantMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVariant>>, TError,{id: number;data: BodyType<VariantUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateVariant>>, TError,{id: number;data: BodyType<VariantUpdate>}, TContext> => {
+
+const mutationKey = ['updateVariant'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateVariant>>, {id: number;data: BodyType<VariantUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateVariant(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateVariantMutationResult = NonNullable<Awaited<ReturnType<typeof updateVariant>>>
+    export type UpdateVariantMutationBody = BodyType<VariantUpdate>
+    export type UpdateVariantMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update a variant
+ */
+export const useUpdateVariant = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVariant>>, TError,{id: number;data: BodyType<VariantUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateVariant>>,
+        TError,
+        {id: number;data: BodyType<VariantUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateVariantMutationOptions(options));
+    }
+
+export const getDeleteVariantUrl = (id: number,) => {
+
+
+
+
+  return `/api/variants/${id}`
+}
+
+/**
+ * @summary Delete a variant
+ */
+export const deleteVariant = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteVariantUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteVariantMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVariant>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteVariant>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteVariant'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteVariant>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteVariant(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteVariantMutationResult = NonNullable<Awaited<ReturnType<typeof deleteVariant>>>
+
+    export type DeleteVariantMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a variant
+ */
+export const useDeleteVariant = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVariant>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteVariant>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteVariantMutationOptions(options));
+    }
+
+export const getAddVariantImageUrl = (id: number,) => {
+
+
+
+
+  return `/api/variants/${id}/images`
+}
+
+/**
+ * @summary Add an image to a variant
+ */
+export const addVariantImage = async (id: number,
+    variantImageInput: VariantImageInput, options?: RequestInit): Promise<VariantImage> => {
+
+  return customFetch<VariantImage>(getAddVariantImageUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      variantImageInput,)
+  }
+);}
+
+
+
+
+export const getAddVariantImageMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addVariantImage>>, TError,{id: number;data: BodyType<VariantImageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addVariantImage>>, TError,{id: number;data: BodyType<VariantImageInput>}, TContext> => {
+
+const mutationKey = ['addVariantImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addVariantImage>>, {id: number;data: BodyType<VariantImageInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  addVariantImage(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddVariantImageMutationResult = NonNullable<Awaited<ReturnType<typeof addVariantImage>>>
+    export type AddVariantImageMutationBody = BodyType<VariantImageInput>
+    export type AddVariantImageMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Add an image to a variant
+ */
+export const useAddVariantImage = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addVariantImage>>, TError,{id: number;data: BodyType<VariantImageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addVariantImage>>,
+        TError,
+        {id: number;data: BodyType<VariantImageInput>},
+        TContext
+      > => {
+      return useMutation(getAddVariantImageMutationOptions(options));
+    }
+
+export const getDeleteVariantImageUrl = (id: number,
+    imageId: number,) => {
+
+
+
+
+  return `/api/variants/${id}/images/${imageId}`
+}
+
+/**
+ * @summary Delete a variant image
+ */
+export const deleteVariantImage = async (id: number,
+    imageId: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteVariantImageUrl(id,imageId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteVariantImageMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVariantImage>>, TError,{id: number;imageId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteVariantImage>>, TError,{id: number;imageId: number}, TContext> => {
+
+const mutationKey = ['deleteVariantImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteVariantImage>>, {id: number;imageId: number}> = (props) => {
+          const {id,imageId} = props ?? {};
+
+          return  deleteVariantImage(id,imageId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteVariantImageMutationResult = NonNullable<Awaited<ReturnType<typeof deleteVariantImage>>>
+
+    export type DeleteVariantImageMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a variant image
+ */
+export const useDeleteVariantImage = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVariantImage>>, TError,{id: number;imageId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteVariantImage>>,
+        TError,
+        {id: number;imageId: number},
+        TContext
+      > => {
+      return useMutation(getDeleteVariantImageMutationOptions(options));
+    }
+
+export const getUpsertVariantSizesUrl = (id: number,) => {
+
+
+
+
+  return `/api/variants/${id}/sizes`
+}
+
+/**
+ * @summary Replace all sizes for a variant
+ */
+export const upsertVariantSizes = async (id: number,
+    variantSizeInput: VariantSizeInput[], options?: RequestInit): Promise<VariantSize[]> => {
+
+  return customFetch<VariantSize[]>(getUpsertVariantSizesUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      variantSizeInput,)
+  }
+);}
+
+
+
+
+export const getUpsertVariantSizesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upsertVariantSizes>>, TError,{id: number;data: BodyType<VariantSizeInput[]>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof upsertVariantSizes>>, TError,{id: number;data: BodyType<VariantSizeInput[]>}, TContext> => {
+
+const mutationKey = ['upsertVariantSizes'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof upsertVariantSizes>>, {id: number;data: BodyType<VariantSizeInput[]>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  upsertVariantSizes(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpsertVariantSizesMutationResult = NonNullable<Awaited<ReturnType<typeof upsertVariantSizes>>>
+    export type UpsertVariantSizesMutationBody = BodyType<VariantSizeInput[]>
+    export type UpsertVariantSizesMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Replace all sizes for a variant
+ */
+export const useUpsertVariantSizes = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upsertVariantSizes>>, TError,{id: number;data: BodyType<VariantSizeInput[]>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof upsertVariantSizes>>,
+        TError,
+        {id: number;data: BodyType<VariantSizeInput[]>},
+        TContext
+      > => {
+      return useMutation(getUpsertVariantSizesMutationOptions(options));
+    }
+
+export const getGetSizeGuidesUrl = () => {
+
+
+
+
+  return `/api/size-guides`
+}
+
+/**
+ * @summary List size guides
+ */
+export const getSizeGuides = async ( options?: RequestInit): Promise<SizeGuide[]> => {
+
+  return customFetch<SizeGuide[]>(getGetSizeGuidesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSizeGuidesQueryKey = () => {
+    return [
+    `/api/size-guides`
+    ] as const;
+    }
+
+
+export const getGetSizeGuidesQueryOptions = <TData = Awaited<ReturnType<typeof getSizeGuides>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSizeGuides>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSizeGuidesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSizeGuides>>> = ({ signal }) => getSizeGuides({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSizeGuides>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSizeGuidesQueryResult = NonNullable<Awaited<ReturnType<typeof getSizeGuides>>>
+export type GetSizeGuidesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List size guides
+ */
+
+export function useGetSizeGuides<TData = Awaited<ReturnType<typeof getSizeGuides>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSizeGuides>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSizeGuidesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateSizeGuideUrl = () => {
+
+
+
+
+  return `/api/size-guides`
+}
+
+/**
+ * @summary Create a size guide
+ */
+export const createSizeGuide = async (sizeGuideInput: SizeGuideInput, options?: RequestInit): Promise<SizeGuide> => {
+
+  return customFetch<SizeGuide>(getCreateSizeGuideUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      sizeGuideInput,)
+  }
+);}
+
+
+
+
+export const getCreateSizeGuideMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSizeGuide>>, TError,{data: BodyType<SizeGuideInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createSizeGuide>>, TError,{data: BodyType<SizeGuideInput>}, TContext> => {
+
+const mutationKey = ['createSizeGuide'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSizeGuide>>, {data: BodyType<SizeGuideInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createSizeGuide(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateSizeGuideMutationResult = NonNullable<Awaited<ReturnType<typeof createSizeGuide>>>
+    export type CreateSizeGuideMutationBody = BodyType<SizeGuideInput>
+    export type CreateSizeGuideMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a size guide
+ */
+export const useCreateSizeGuide = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSizeGuide>>, TError,{data: BodyType<SizeGuideInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createSizeGuide>>,
+        TError,
+        {data: BodyType<SizeGuideInput>},
+        TContext
+      > => {
+      return useMutation(getCreateSizeGuideMutationOptions(options));
+    }
+
+export const getGetSizeGuideUrl = (id: number,) => {
+
+
+
+
+  return `/api/size-guides/${id}`
+}
+
+/**
+ * @summary Get a size guide
+ */
+export const getSizeGuide = async (id: number, options?: RequestInit): Promise<SizeGuide> => {
+
+  return customFetch<SizeGuide>(getGetSizeGuideUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSizeGuideQueryKey = (id: number,) => {
+    return [
+    `/api/size-guides/${id}`
+    ] as const;
+    }
+
+
+export const getGetSizeGuideQueryOptions = <TData = Awaited<ReturnType<typeof getSizeGuide>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSizeGuide>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSizeGuideQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSizeGuide>>> = ({ signal }) => getSizeGuide(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSizeGuide>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSizeGuideQueryResult = NonNullable<Awaited<ReturnType<typeof getSizeGuide>>>
+export type GetSizeGuideQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get a size guide
+ */
+
+export function useGetSizeGuide<TData = Awaited<ReturnType<typeof getSizeGuide>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSizeGuide>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSizeGuideQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateSizeGuideUrl = (id: number,) => {
+
+
+
+
+  return `/api/size-guides/${id}`
+}
+
+/**
+ * @summary Update a size guide
+ */
+export const updateSizeGuide = async (id: number,
+    sizeGuideInput: SizeGuideInput, options?: RequestInit): Promise<SizeGuide> => {
+
+  return customFetch<SizeGuide>(getUpdateSizeGuideUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      sizeGuideInput,)
+  }
+);}
+
+
+
+
+export const getUpdateSizeGuideMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSizeGuide>>, TError,{id: number;data: BodyType<SizeGuideInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateSizeGuide>>, TError,{id: number;data: BodyType<SizeGuideInput>}, TContext> => {
+
+const mutationKey = ['updateSizeGuide'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateSizeGuide>>, {id: number;data: BodyType<SizeGuideInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateSizeGuide(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateSizeGuideMutationResult = NonNullable<Awaited<ReturnType<typeof updateSizeGuide>>>
+    export type UpdateSizeGuideMutationBody = BodyType<SizeGuideInput>
+    export type UpdateSizeGuideMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update a size guide
+ */
+export const useUpdateSizeGuide = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSizeGuide>>, TError,{id: number;data: BodyType<SizeGuideInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateSizeGuide>>,
+        TError,
+        {id: number;data: BodyType<SizeGuideInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateSizeGuideMutationOptions(options));
+    }
+
+export const getDeleteSizeGuideUrl = (id: number,) => {
+
+
+
+
+  return `/api/size-guides/${id}`
+}
+
+/**
+ * @summary Delete a size guide
+ */
+export const deleteSizeGuide = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteSizeGuideUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteSizeGuideMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSizeGuide>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSizeGuide>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteSizeGuide'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSizeGuide>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteSizeGuide(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSizeGuideMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSizeGuide>>>
+
+    export type DeleteSizeGuideMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a size guide
+ */
+export const useDeleteSizeGuide = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSizeGuide>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSizeGuide>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteSizeGuideMutationOptions(options));
+    }
 
 export const getBulkPriceUpdateUrl = () => {
 

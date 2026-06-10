@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, Tag, ShoppingBag, Settings, LogOut, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Package, Tag, ShoppingBag, Settings, LogOut, Ruler } from "lucide-react";
 
 const NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -7,6 +7,7 @@ const NAV = [
   { href: "/admin/productos", label: "Productos", icon: Package },
   { href: "/admin/categorias", label: "Categorías", icon: Tag },
   { href: "/admin/promociones", label: "Promociones", icon: Tag },
+  { href: "/admin/guias-talles", label: "Guías de talles", icon: Ruler },
   { href: "/admin/configuracion", label: "Configuración", icon: Settings },
 ];
 

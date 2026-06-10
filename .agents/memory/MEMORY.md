@@ -1,0 +1,4 @@
+- [API Server zod imports](api-server-zod.md) — never import zod/zod/v4 directly in api-server routes; use manual validation or drizzle-zod schemas from @workspace/db
+- [Object storage URL pattern](object-storage-urls.md) — objectPath from upload = `/objects/xxx`; to serve use `/api/storage/objects/xxx` (strip `/objects/` prefix from path)
+- [pnpm overrides syntax](pnpm-overrides.md) — use explicit version strings (e.g. "19.1.0") not "$react" syntax in pnpm overrides; React 19.1.0 satisfies Uppy v5 peer deps so no override needed
+- [Lib tsconfig for object-storage-web](object-storage-web-lib.md) — must add composite+declarationMap+emitDeclarationOnly to be proper composite lib; add to root tsconfig.json references

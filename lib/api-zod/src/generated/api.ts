@@ -983,6 +983,252 @@ export const GetSalesByDayResponseItem = zod.object({
 export const GetSalesByDayResponse = zod.array(GetSalesByDayResponseItem)
 
 
+/**
+ * @summary Request a presigned URL for file upload
+ */
+export const RequestUploadUrlBody = zod.object({
+  "name": zod.string(),
+  "size": zod.number(),
+  "contentType": zod.string()
+})
+
+export const RequestUploadUrlResponse = zod.object({
+  "uploadURL": zod.string(),
+  "objectPath": zod.string(),
+  "metadata": zod.object({
+
+}).passthrough().optional()
+})
+
+
+/**
+ * @summary Get all variants for a product
+ */
+export const GetProductVariantsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetProductVariantsResponseItem = zod.object({
+  "id": zod.number(),
+  "productId": zod.number(),
+  "colorName": zod.string(),
+  "colorHex": zod.string(),
+  "sortOrder": zod.number().optional(),
+  "active": zod.boolean().optional(),
+  "images": zod.array(zod.object({
+  "id": zod.number(),
+  "variantId": zod.number(),
+  "objectPath": zod.string(),
+  "sortOrder": zod.number()
+})).optional(),
+  "sizes": zod.array(zod.object({
+  "id": zod.number(),
+  "variantId": zod.number(),
+  "size": zod.string(),
+  "stock": zod.number(),
+  "active": zod.boolean().optional()
+})).optional()
+})
+export const GetProductVariantsResponse = zod.array(GetProductVariantsResponseItem)
+
+
+/**
+ * @summary Create a variant for a product
+ */
+export const CreateVariantParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const CreateVariantBody = zod.object({
+  "colorName": zod.string(),
+  "colorHex": zod.string(),
+  "sortOrder": zod.number().optional(),
+  "active": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Update a variant
+ */
+export const UpdateVariantParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateVariantBody = zod.object({
+  "colorName": zod.string().optional(),
+  "colorHex": zod.string().optional(),
+  "sortOrder": zod.number().optional(),
+  "active": zod.boolean().optional()
+})
+
+export const UpdateVariantResponse = zod.object({
+  "id": zod.number(),
+  "productId": zod.number(),
+  "colorName": zod.string(),
+  "colorHex": zod.string(),
+  "sortOrder": zod.number().optional(),
+  "active": zod.boolean().optional(),
+  "images": zod.array(zod.object({
+  "id": zod.number(),
+  "variantId": zod.number(),
+  "objectPath": zod.string(),
+  "sortOrder": zod.number()
+})).optional(),
+  "sizes": zod.array(zod.object({
+  "id": zod.number(),
+  "variantId": zod.number(),
+  "size": zod.string(),
+  "stock": zod.number(),
+  "active": zod.boolean().optional()
+})).optional()
+})
+
+
+/**
+ * @summary Delete a variant
+ */
+export const DeleteVariantParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Add an image to a variant
+ */
+export const AddVariantImageParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AddVariantImageBody = zod.object({
+  "objectPath": zod.string(),
+  "sortOrder": zod.number().optional()
+})
+
+
+/**
+ * @summary Delete a variant image
+ */
+export const DeleteVariantImageParams = zod.object({
+  "id": zod.coerce.number(),
+  "imageId": zod.coerce.number()
+})
+
+
+/**
+ * @summary Replace all sizes for a variant
+ */
+export const UpsertVariantSizesParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpsertVariantSizesBodyItem = zod.object({
+  "size": zod.string(),
+  "stock": zod.number(),
+  "active": zod.boolean().optional()
+})
+export const UpsertVariantSizesBody = zod.array(UpsertVariantSizesBodyItem)
+
+export const UpsertVariantSizesResponseItem = zod.object({
+  "id": zod.number(),
+  "variantId": zod.number(),
+  "size": zod.string(),
+  "stock": zod.number(),
+  "active": zod.boolean().optional()
+})
+export const UpsertVariantSizesResponse = zod.array(UpsertVariantSizesResponseItem)
+
+
+/**
+ * @summary List size guides
+ */
+export const GetSizeGuidesResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "tableData": zod.object({
+
+}).passthrough().optional(),
+  "instructions": zod.string().nullish(),
+  "imageObjectPath": zod.string().nullish(),
+  "active": zod.boolean().optional()
+})
+export const GetSizeGuidesResponse = zod.array(GetSizeGuidesResponseItem)
+
+
+/**
+ * @summary Create a size guide
+ */
+export const CreateSizeGuideBody = zod.object({
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "tableData": zod.object({
+
+}).passthrough().optional(),
+  "instructions": zod.string().nullish(),
+  "imageObjectPath": zod.string().nullish(),
+  "active": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Get a size guide
+ */
+export const GetSizeGuideParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetSizeGuideResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "tableData": zod.object({
+
+}).passthrough().optional(),
+  "instructions": zod.string().nullish(),
+  "imageObjectPath": zod.string().nullish(),
+  "active": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Update a size guide
+ */
+export const UpdateSizeGuideParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateSizeGuideBody = zod.object({
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "tableData": zod.object({
+
+}).passthrough().optional(),
+  "instructions": zod.string().nullish(),
+  "imageObjectPath": zod.string().nullish(),
+  "active": zod.boolean().optional()
+})
+
+export const UpdateSizeGuideResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "tableData": zod.object({
+
+}).passthrough().optional(),
+  "instructions": zod.string().nullish(),
+  "imageObjectPath": zod.string().nullish(),
+  "active": zod.boolean().optional()
+})
+
+
+/**
+ * @summary Delete a size guide
+ */
+export const DeleteSizeGuideParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
 export const BulkPriceUpdateBody = zod.object({
   "type": zod.enum(['increase_percentage', 'decrease_percentage', 'increase_fixed', 'decrease_fixed']),
   "value": zod.number(),

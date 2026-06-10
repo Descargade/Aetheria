@@ -1,10 +1,11 @@
-# [Project name]
+# AETHERIA — Tienda Online
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+_Tienda de ropa urbana streetwear premium con panel de administración completo, carrito, checkout, favoritos, órdenes, promociones y métricas._
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080, proxied at /api)
+- `pnpm --filter @workspace/aetheria run dev` — run the storefront (proxied at /)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
@@ -14,32 +15,57 @@ _Replace the heading above with the project's name, and this line with one sente
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
+- API: Express 5 (port 8080)
 - DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
+- Validation: Zod (drizzle-zod), manual array checks in server routes
+- API codegen: Orval (from OpenAPI spec in `lib/api-spec/openapi.yaml`)
 - Build: esbuild (CJS bundle)
+- Frontend: React 19 + Vite + Tailwind CSS v4 + shadcn/ui
+- Storage: Replit Object Storage (presigned URLs via `lib/object-storage-web`)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `lib/db/src/schema/` — DB schema (products, categories, variants, size_guides, etc.)
+- `lib/api-spec/openapi.yaml` — OpenAPI spec (source of truth for API contracts)
+- `lib/api-client-react/src/generated/` — generated React Query hooks (don't edit manually)
+- `artifacts/api-server/src/routes/` — Express route handlers
+- `artifacts/aetheria/src/` — React storefront + admin panel
+- `artifacts/aetheria/src/components/admin/` — admin components (AdminLayout, VariantManager)
+- `artifacts/aetheria/src/pages/admin/` — admin pages
+- `artifacts/aetheria/src/lib/storage-utils.ts` — `objectUrl()` helper for image URLs
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Contract-first API: define in OpenAPI → run codegen → use generated hooks in frontend
+- Object storage images: objectPath from upload = `/objects/xxx`; serve via `/api/storage/objects/xxx`
+- Never import `zod` or `zod/v4` directly in api-server routes (esbuild can't resolve it); use drizzle-zod schemas from `@workspace/db` or manual validation
+- Variants are separate from products: each product has color variants, each variant has sizes (with stock) and images
+- Admin credentials: username=`admin`, password=`aetheria2024`, token=`aetheria-admin-token-secret`
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- **Storefront**: Home, shop/collection, product detail (with color/size variant selector), cart, checkout, favorites, contact
+- **Admin panel**: Dashboard metrics, orders management, products (with image upload + variant manager), categories (with image upload), promotions, size guides, shipping config
+- **Variants**: Per-color variants with per-size stock and multiple images per color
+- **Size guides**: Editable table with measurements, instructions, reference image
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Everything in Spanish, prices in ARS $
+- Dark/light mode support
+- Premium urban streetwear aesthetic: dark bg #0a0a0a, electric violet hsl(266 100% 50%)
+- Fonts: Syne (headings) + Space Mono (data/labels)
+- Sharp edges (border-radius: 0)
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- After any change to `lib/api-spec/openapi.yaml`, run `pnpm --filter @workspace/api-spec run codegen`
+- After any DB schema change, run `pnpm --filter @workspace/db run push` (dev) or apply migrations manually for prod
+- Do NOT add `zod`/`zod/v4` imports to api-server routes — esbuild fails to bundle them
+- `@workspace/db`'s drizzle instance is initialized with `{ schema }` so `db.query.*` relational queries work
+- The variants router is mounted at `/variants` for direct CRUD; product-scoped routes (`/products/:id/variants`) are in the products router
 
 ## Pointers
 
 - See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- See `.agents/memory/` for session-specific lessons and decisions

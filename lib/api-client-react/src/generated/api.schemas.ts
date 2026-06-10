@@ -530,6 +530,100 @@ export interface BulkUpdateResult {
   message?: string;
 }
 
+export interface UploadUrlRequest {
+  name: string;
+  size: number;
+  contentType: string;
+}
+
+export type UploadUrlResponseMetadata = { [key: string]: unknown };
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+  metadata?: UploadUrlResponseMetadata;
+}
+
+export interface VariantImage {
+  id: number;
+  variantId: number;
+  objectPath: string;
+  sortOrder: number;
+}
+
+export interface VariantSize {
+  id: number;
+  variantId: number;
+  size: string;
+  stock: number;
+  active?: boolean;
+}
+
+export interface Variant {
+  id: number;
+  productId: number;
+  colorName: string;
+  colorHex: string;
+  sortOrder?: number;
+  active?: boolean;
+  images?: VariantImage[];
+  sizes?: VariantSize[];
+}
+
+export interface VariantInput {
+  colorName: string;
+  colorHex: string;
+  sortOrder?: number;
+  active?: boolean;
+}
+
+export interface VariantUpdate {
+  colorName?: string;
+  colorHex?: string;
+  sortOrder?: number;
+  active?: boolean;
+}
+
+export interface VariantImageInput {
+  objectPath: string;
+  sortOrder?: number;
+}
+
+export interface VariantSizeInput {
+  size: string;
+  stock: number;
+  active?: boolean;
+}
+
+export type SizeGuideTableData = { [key: string]: unknown };
+
+export interface SizeGuide {
+  id: number;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  tableData?: SizeGuideTableData;
+  /** @nullable */
+  instructions?: string | null;
+  /** @nullable */
+  imageObjectPath?: string | null;
+  active?: boolean;
+}
+
+export type SizeGuideInputTableData = { [key: string]: unknown };
+
+export interface SizeGuideInput {
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  tableData?: SizeGuideInputTableData;
+  /** @nullable */
+  instructions?: string | null;
+  /** @nullable */
+  imageObjectPath?: string | null;
+  active?: boolean;
+}
+
 export type GetProductsParams = {
 /**
  * @nullable
