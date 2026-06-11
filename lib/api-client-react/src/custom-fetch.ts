@@ -334,29 +334,6 @@ async function parseSuccessBody(
   }
 }
 
-  const effectiveType =
-    responseType === "auto" ? inferResponseType(response) : responseType;
-
-  switch (effectiveType) {
-    case "json":
-      return parseJsonBody(response, requestInfo);
-
-    case "text": {
-      const text = await response.text();
-      return text === "" ? null : text;
-    }
-
-    case "blob":
-      if (typeof response.blob !== "function") {
-        throw new TypeError(
-          "Blob responses are not supported in this runtime. " +
-            "Use responseType \"json\" or \"text\" instead.",
-        );
-      }
-      return response.blob();
-  }
-}
-
 export async function customFetch<T = unknown>(
   input: RequestInfo | URL,
   options: CustomFetchOptions = {},
