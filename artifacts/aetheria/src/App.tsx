@@ -108,21 +108,22 @@ function Router() {
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean }
+  { hasError: boolean; error: Error | null }
 > {
-  state = { hasError: false };
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  state: { hasError: boolean; error: Error | null } = { hasError: false, error: null };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
   }
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground font-mono p-8 text-center">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white font-mono p-8 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase mb-4">Error</h1>
-          <p className="text-muted-foreground mb-8">Algo salió mal. Recargá la página o intentá de nuevo.</p>
+          <p className="text-white/60 mb-2 text-sm">Algo salió mal. Recargá la página o intentá de nuevo.</p>
+          <p className="text-red-400 mb-8 text-xs max-w-lg break-all">{(this.state.error?.message || "") + (this.state.error?.stack?.split("\n").slice(0, 3).join(" · ") || "")}</p>
           <button
             onClick={() => window.location.reload()}
-            className="h-12 px-6 bg-primary text-primary-foreground font-mono uppercase tracking-widest border-none cursor-pointer"
+            className="h-12 px-6 bg-white text-black font-mono uppercase tracking-widest border-none cursor-pointer"
           >
             Recargar
           </button>
