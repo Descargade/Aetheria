@@ -302,6 +302,41 @@ async function parseSuccessBody(
   const effectiveType =
     responseType === "auto" ? inferResponseType(response) : responseType;
 
+  // In auto mode, reject HTML responses — API endpoints should never return
+  // HTML.  SPA fallback rewrites (e.g. Vercel, Netlify) can cause API calls to
+  // silently receive index.html, which would later crash when code tries to
+  // .map() over the returned string.
+  if (responseType === "auto") {
+    const mt = getMediaType(response.headers);
+    if (mt === "text/html") {
+      const rawBody = await response.text();
+      throw new ResponseParseError(response, rawBody, new Error("Unexpected HTML response from API endpoint"), requestInfo);
+    }
+  }
+
+  switch (effectiveType) {
+    case "json":
+      return parseJsonBody(response, requestInfo);
+
+    case "text": {
+      const text = await response.text();
+      return text === "" ? null : text;
+    }
+
+    case "blob":
+      if (typeof response.blob !== "function") {
+        throw new TypeError(
+          "Blob responses are not supported in this runtime. " +
+            'Use responseType "json" or "text" instead.',
+        );
+      }
+      return response.blob();
+  }
+}
+
+  const effectiveType =
+    responseType === "auto" ? inferResponseType(response) : responseType;
+
   switch (effectiveType) {
     case "json":
       return parseJsonBody(response, requestInfo);
