@@ -4,16 +4,34 @@ import {
   useGetProduct, useAddToCart, getGetCartQueryKey, useAddFavorite, useRemoveFavorite,
   useGetFavorites, getGetFavoritesQueryKey, getGetProductQueryKey,
   useGetProductVariants, getGetProductVariantsQueryKey,
+  useGetPaymentMethods, useGetSizeGuides,
   type Variant,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { PLACEHOLDER_IMAGE } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/use-session";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, ChevronRight, ShoppingBag, Ruler } from "lucide-react";
 import { objectUrl } from "@/lib/storage-utils";
 
-function SizeGuideModal({ onClose }: { onClose: () => void }) {
+function SizeGuideModal({ onClose, categoryId }: { onClose: () => void; categoryId?: number }) {
+  const { data: sizeGuides } = useGetSizeGuides();
+
+  const guide = categoryId
+    ? sizeGuides?.find((sg) => sg.categoryId === categoryId)
+    : sizeGuides?.[0];
+
+  const headers = guide?.sizes && guide.sizes.length > 0
+    ? Object.keys(guide.sizes[0] as object)
+    : ["Talle", "Pecho (cm)", "Cintura (cm)", "Cadera (cm)"];
+
+  const rows = guide?.sizes && guide.sizes.length > 0
+    ? guide.sizes.map((s: Record<string, string>) => headers.map((h) => s[h] ?? "-"))
+    : [["XS","82-85","66-69","88-91"],["S","86-89","70-73","92-95"],["M","90-93","74-77","96-99"],["L","94-97","78-81","100-103"],["XL","98-101","82-85","104-107"],["XXL","102-105","86-89","108-111"]];
+
+  const instructions = guide?.instructions || "Medite el contorno del pecho con una cinta métrica, colocándola horizontalmente bajo las axilas. Consulte la tabla para encontrar su talle.";
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
       <div className="bg-background border border-border w-full max-w-lg p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
@@ -21,17 +39,17 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
           <h3 className="font-mono font-bold uppercase tracking-widest text-sm">Guía de talles</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-lg font-bold leading-none">&times;</button>
         </div>
-        <p className="font-mono text-xs text-muted-foreground">Medite el contorno del pecho con una cinta métrica, colocándola horizontalmente bajo las axilas. Consulte la tabla para encontrar su talle.</p>
+        <p className="font-mono text-xs text-muted-foreground">{instructions}</p>
         <table className="w-full font-mono text-xs border-collapse">
           <thead>
             <tr className="bg-muted/30">
-              {["Talle","Pecho (cm)","Cintura (cm)","Cadera (cm)"].map(h => (
+              {headers.map(h => (
                 <th key={h} className="border border-border px-3 py-2 text-left">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {[["XS","82-85","66-69","88-91"],["S","86-89","70-73","92-95"],["M","90-93","74-77","96-99"],["L","94-97","78-81","100-103"],["XL","98-101","82-85","104-107"],["XXL","102-105","86-89","108-111"]].map(row => (
+            {rows.map(row => (
               <tr key={row[0]} className="hover:bg-muted/10">
                 {row.map((cell, i) => <td key={i} className="border border-border px-3 py-2">{cell}</td>)}
               </tr>
@@ -59,6 +77,16 @@ export function ProductDetail() {
   const { data: variants } = useGetProductVariants(productId, {
     query: { enabled: !!productId, queryKey: getGetProductVariantsQueryKey(productId) },
   });
+  const { data: paymentMethods } = useGetPaymentMethods();
+
+  const transferDiscount = paymentMethods?.find((pm) =>
+    pm.name.toLowerCase().includes("transferencia")
+  )?.discount;
+  const cashDiscount = paymentMethods?.find((pm) =>
+    pm.name.toLowerCase().includes("efectivo")
+  )?.discount;
+  const discountPct = Number(transferDiscount || cashDiscount || 10);
+  const calcDiscounted = (effPrice: number) => Math.round(effPrice * (1 - discountPct / 100));
 
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [selectedSize, setSelectedSize] = useState<string>("");
@@ -94,7 +122,7 @@ export function ProductDetail() {
   const currentVariant = selectedVariant ?? activeVariants[0] ?? null;
 
   const variantImages = currentVariant?.images?.map((img) => objectUrl(img.objectPath)).filter(Boolean) as string[] ?? [];
-  const fallback = product.images?.length ? product.images : ["/images/products/placeholder.png"];
+  const fallback = product.images?.length ? product.images : [PLACEHOLDER_IMAGE];
   const images = variantImages.length > 0 ? variantImages : fallback;
 
   const availableSizes = currentVariant?.sizes?.filter((s) => s.active && s.stock > 0) ?? [];
@@ -186,10 +214,10 @@ export function ProductDetail() {
                 </div>
                 {(() => {
                   const effPrice = Number(product.salePrice || product.price);
-                  const transPrice = Math.round(effPrice * 0.9);
+                  const discPrice = calcDiscounted(effPrice);
                   return (
                     <div className="flex items-center gap-2 text-sm font-mono text-muted-foreground">
-                      <span>Transf. <span className="text-primary font-semibold">${transPrice.toLocaleString("es-AR")}</span></span>
+                      <span>Transf. <span className="text-primary font-semibold">${discPrice.toLocaleString("es-AR")}</span></span>
                       <span className="text-muted-foreground/40">/</span>
                       <span>Efect. <span className="font-semibold text-foreground">${effPrice.toLocaleString("es-AR")}</span></span>
                     </div>
@@ -277,13 +305,13 @@ export function ProductDetail() {
             <div className="h-px bg-border w-full mb-8" />
 
             <div className="prose prose-sm dark:prose-invert max-w-none font-mono text-muted-foreground leading-relaxed">
-              <p>{product.description || "Diseño futurista y minimalista con precisión quirúrgica. Desarrollado con materiales de alta tecnología para el máximo confort y durabilidad en entornos urbanos."}</p>
+              {product.description && <p>{product.description}</p>}
             </div>
           </div>
         </div>
       </div>
 
-      {showSizeGuide && <SizeGuideModal onClose={() => setShowSizeGuide(false)} />}
+      {showSizeGuide && <SizeGuideModal onClose={() => setShowSizeGuide(false)} categoryId={product.categoryId} />}
     </>
   );
 }

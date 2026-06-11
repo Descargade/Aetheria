@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { useGetProducts, getGetProductsQueryKey } from "@workspace/api-client-react";
+import { PLACEHOLDER_IMAGE } from "@/lib/constants";
 import { Link, useLocation } from "wouter";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -99,7 +100,7 @@ export function SearchBar() {
                   >
                     <div className="h-12 w-10 bg-muted overflow-hidden shrink-0 border border-border">
                       <img
-                        src={p.images?.[0] || "/images/products/jacket-1.png"}
+                        src={p.images?.[0] || PLACEHOLDER_IMAGE}
                         alt={p.name}
                         className="w-full h-full object-cover"
                       />

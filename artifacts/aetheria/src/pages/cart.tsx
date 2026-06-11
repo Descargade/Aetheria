@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { useGetCart, useRemoveFromCart, useUpdateCartItem, getGetCartQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { PLACEHOLDER_IMAGE } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/hooks/use-session";
 import { Trash2, Plus, Minus, ArrowRight } from "lucide-react";
@@ -74,7 +75,7 @@ export function Cart() {
               <div className="w-full md:w-1/2 flex gap-4">
                 <Link href={`/producto/${item.productId}`}>
                   <div className="w-24 aspect-[3/4] bg-muted border border-border shrink-0 cursor-pointer hover:border-primary transition-colors">
-                    <img src={item.product?.images?.[0] || '/images/products/jacket-1.png'} alt={item.product?.name} className="w-full h-full object-cover" />
+                    <img src={item.product?.images?.[0] || PLACEHOLDER_IMAGE} alt={item.product?.name} className="w-full h-full object-cover" />
                   </div>
                 </Link>
                 <div className="flex flex-col py-1">

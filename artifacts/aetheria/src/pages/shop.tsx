@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useSearch, useLocation } from "wouter";
-import { useGetProducts, useGetCategories, useAddFavorite, useRemoveFavorite, useGetFavorites, getGetFavoritesQueryKey } from "@workspace/api-client-react";
+import { useGetProducts, useGetCategories, useAddFavorite, useRemoveFavorite, useGetFavorites, getGetFavoritesQueryKey, useGetPaymentMethods } from "@workspace/api-client-react";
+import { PLACEHOLDER_IMAGE } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -53,6 +54,16 @@ export function Shop() {
 
   const { data: categories } = useGetCategories();
   const { data: favorites } = useGetFavorites({ sessionId }, { query: { enabled: !!sessionId, queryKey: getGetFavoritesQueryKey({ sessionId }) } });
+  const { data: paymentMethods } = useGetPaymentMethods();
+
+  const transferDiscount = paymentMethods?.find((pm) =>
+    pm.name.toLowerCase().includes("transferencia")
+  )?.discount;
+  const cashDiscount = paymentMethods?.find((pm) =>
+    pm.name.toLowerCase().includes("efectivo")
+  )?.discount;
+  const discountPct = Number(transferDiscount || cashDiscount || 10);
+  const calcDiscounted = (effPrice: number) => Math.round(effPrice * (1 - discountPct / 100));
 
   const addFavorite = useAddFavorite();
   const removeFavorite = useRemoveFavorite();
@@ -276,7 +287,7 @@ export function Shop() {
                     <Link href={`/producto/${product.id}`}>
                       <div className="relative aspect-[3/4] bg-muted overflow-hidden mb-4 border border-border group-hover:border-primary/50 transition-colors">
                         <img
-                          src={product.images?.[0] || '/images/products/jacket-1.png'}
+                          src={product.images?.[0] || PLACEHOLDER_IMAGE}
                           alt={product.name}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
@@ -294,7 +305,7 @@ export function Shop() {
                         <p className="text-muted-foreground text-xs truncate">{product.categoryName}</p>
                         {(() => {
                           const effPrice = Number(product.salePrice || product.price);
-                          const transPrice = Math.round(effPrice * 0.9);
+                          const discPrice = calcDiscounted(effPrice);
                           return (
                             <div>
                               {product.salePrice ? (
@@ -306,7 +317,7 @@ export function Shop() {
                                 <span className="font-bold text-foreground">${Number(product.price).toLocaleString('es-AR')}</span>
                               )}
                               <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
-                                <span>Transf. <span className="text-primary font-semibold">${transPrice.toLocaleString('es-AR')}</span></span>
+                                <span>Transf. <span className="text-primary font-semibold">${discPrice.toLocaleString('es-AR')}</span></span>
                                 <span className="text-muted-foreground/40">/</span>
                                 <span>Efect. <span className="font-semibold text-foreground">${effPrice.toLocaleString('es-AR')}</span></span>
                               </div>
