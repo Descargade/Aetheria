@@ -173,15 +173,28 @@ export function ProductDetail() {
             <div className="mb-8">
               <p className="text-primary font-mono text-sm uppercase tracking-widest mb-2">{product.categoryName}</p>
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase mb-4">{product.name}</h1>
-              <div className="flex items-center gap-4 text-2xl font-mono">
-                {product.salePrice ? (
-                  <>
-                    <span className="text-destructive font-bold">${Number(product.salePrice).toLocaleString("es-AR")}</span>
-                    <span className="text-muted-foreground line-through text-lg">${Number(product.price).toLocaleString("es-AR")}</span>
-                  </>
-                ) : (
-                  <span className="font-bold">${Number(product.price).toLocaleString("es-AR")}</span>
-                )}
+              <div className="space-y-2">
+                <div className="flex items-center gap-4 text-2xl font-mono">
+                  {product.salePrice ? (
+                    <>
+                      <span className="text-destructive font-bold">${Number(product.salePrice).toLocaleString("es-AR")}</span>
+                      <span className="text-muted-foreground line-through font-bold text-lg">${Number(product.price).toLocaleString("es-AR")}</span>
+                    </>
+                  ) : (
+                    <span className="font-bold">${Number(product.price).toLocaleString("es-AR")}</span>
+                  )}
+                </div>
+                {(() => {
+                  const effPrice = Number(product.salePrice || product.price);
+                  const transPrice = Math.round(effPrice * 0.9);
+                  return (
+                    <div className="flex items-center gap-2 text-sm font-mono text-muted-foreground">
+                      <span>Transf. <span className="text-primary font-semibold">${transPrice.toLocaleString("es-AR")}</span></span>
+                      <span className="text-muted-foreground/40">/</span>
+                      <span>Efect. <span className="font-semibold text-foreground">${effPrice.toLocaleString("es-AR")}</span></span>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 

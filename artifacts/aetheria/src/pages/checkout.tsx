@@ -189,7 +189,7 @@ export function Checkout() {
 
             {/* Right: Summary */}
             <div className="w-full lg:w-[380px] shrink-0">
-              <div className="bg-muted/20 border border-border p-6 sticky top-24 space-y-6">
+              <div className="bg-muted/20 border border-border p-6 lg:sticky top-24 space-y-6">
                 <h2 className="text-sm font-mono uppercase tracking-widest border-b border-border pb-4">Resumen del pedido</h2>
 
                 <div className="space-y-3 max-h-56 overflow-y-auto pr-1">

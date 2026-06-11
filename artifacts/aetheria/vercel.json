@@ -1,0 +1,8 @@
+{
+  "buildCommand": "cd ../.. && npm install && cd artifacts/aetheria && npm run build:vercel",
+  "outputDirectory": "dist/public",
+  "installCommand": "cd ../.. && npm install",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

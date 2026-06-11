@@ -72,27 +72,27 @@
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 4%;
   --popover-border: 0 0% 90%;
-  --primary: 266 100% 50%;
+  --primary: 340 80% 55%;
   --primary-foreground: 0 0% 100%;
   --secondary: 0 0% 96%;
   --secondary-foreground: 0 0% 4%;
   --muted: 0 0% 96%;
   --muted-foreground: 0 0% 45%;
-  --accent: 266 100% 95%;
-  --accent-foreground: 266 100% 40%;
+  --accent: 340 80% 92%;
+  --accent-foreground: 340 80% 35%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
   --input: 0 0% 90%;
-  --ring: 266 100% 50%;
+  --ring: 340 80% 55%;
   
   --sidebar: 0 0% 98%;
   --sidebar-foreground: 0 0% 10%;
   --sidebar-border: 0 0% 90%;
-  --sidebar-primary: 266 100% 50%;
+  --sidebar-primary: 340 80% 55%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 0 0% 92%;
   --sidebar-accent-foreground: 0 0% 4%;
-  --sidebar-ring: 266 100% 50%;
+  --sidebar-ring: 340 80% 55%;
 
   --app-font-sans: 'Syne', sans-serif;
   --app-font-mono: 'Space Mono', monospace;
@@ -111,27 +111,27 @@
   --popover: 0 0% 6%;
   --popover-foreground: 0 0% 98%;
   --popover-border: 0 0% 15%;
-  --primary: 266 100% 60%; /* Electric Violet */
+  --primary: 340 80% 60%;
   --primary-foreground: 0 0% 100%;
   --secondary: 0 0% 12%;
   --secondary-foreground: 0 0% 98%;
   --muted: 0 0% 12%;
   --muted-foreground: 0 0% 65%;
-  --accent: 266 100% 60%;
+  --accent: 340 80% 55%;
   --accent-foreground: 0 0% 100%;
   --destructive: 0 62% 30%;
   --destructive-foreground: 0 0% 98%;
   --input: 0 0% 15%;
-  --ring: 266 100% 60%;
+  --ring: 340 80% 60%;
 
   --sidebar: 0 0% 6%;
   --sidebar-foreground: 0 0% 98%;
   --sidebar-border: 0 0% 15%;
-  --sidebar-primary: 266 100% 60%;
+  --sidebar-primary: 340 80% 60%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 0 0% 15%;
   --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-ring: 266 100% 60%;
+  --sidebar-ring: 340 80% 60%;
 }
 
 @layer base {

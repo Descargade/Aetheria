@@ -280,32 +280,39 @@ export function Shop() {
                           alt={product.name}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
-                        {product.isNew && (
-                          <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-mono font-bold px-2 py-1 uppercase tracking-wider">
-                            Nuevo
-                          </div>
-                        )}
-                        {product.salePrice && (
-                          <div className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs font-mono font-bold px-2 py-1 uppercase tracking-wider">
-                            Sale
-                          </div>
-                        )}
                       </div>
-                      <div className="flex justify-between items-start font-mono text-sm">
-                        <div>
-                          <h3 className="font-bold truncate max-w-[200px] uppercase text-foreground group-hover:text-primary transition-colors">{product.name}</h3>
-                          <p className="text-muted-foreground text-xs mt-1 truncate max-w-[200px]">{product.categoryName}</p>
-                        </div>
-                        <div className="text-right">
-                          {product.salePrice ? (
-                            <>
-                              <p className="text-destructive font-bold">${Number(product.salePrice).toLocaleString('es-AR')}</p>
-                              <p className="text-muted-foreground line-through text-xs">${Number(product.price).toLocaleString('es-AR')}</p>
-                            </>
-                          ) : (
-                            <p className="font-bold text-foreground">${Number(product.price).toLocaleString('es-AR')}</p>
+                      <div className="font-mono text-sm space-y-1">
+                        <div className="flex items-center gap-1.5 min-h-[18px]">
+                          {product.isNew && (
+                            <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wider leading-none">Nuevo</span>
+                          )}
+                          {product.salePrice && (
+                            <span className="bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wider leading-none">Sale</span>
                           )}
                         </div>
+                        <h3 className="font-bold truncate uppercase text-foreground group-hover:text-primary transition-colors">{product.name}</h3>
+                        <p className="text-muted-foreground text-xs truncate">{product.categoryName}</p>
+                        {(() => {
+                          const effPrice = Number(product.salePrice || product.price);
+                          const transPrice = Math.round(effPrice * 0.9);
+                          return (
+                            <div>
+                              {product.salePrice ? (
+                                <div className="flex items-baseline gap-2">
+                                  <span className="text-destructive font-bold text-base">${Number(product.salePrice).toLocaleString('es-AR')}</span>
+                                  <span className="text-muted-foreground line-through font-bold text-xs">${Number(product.price).toLocaleString('es-AR')}</span>
+                                </div>
+                              ) : (
+                                <span className="font-bold text-foreground">${Number(product.price).toLocaleString('es-AR')}</span>
+                              )}
+                              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
+                                <span>Transf. <span className="text-primary font-semibold">${transPrice.toLocaleString('es-AR')}</span></span>
+                                <span className="text-muted-foreground/40">/</span>
+                                <span>Efect. <span className="font-semibold text-foreground">${effPrice.toLocaleString('es-AR')}</span></span>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </Link>
                     <button

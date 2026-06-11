@@ -109,6 +109,19 @@ router.get("/sales-by-day", async (_req, res) => {
   res.json(result);
 });
 
+router.delete("/orders", async (req, res) => {
+  const auth = req.headers.authorization;
+  if (!auth || auth !== `Bearer ${ADMIN_TOKEN}`) {
+    return res.status(401).json({ message: "No autorizado" });
+  }
+  const orders = await db.select({ id: ordersTable.id }).from(ordersTable);
+  for (const o of orders) {
+    await db.delete(orderItemsTable).where(eq(orderItemsTable.orderId, o.id));
+    await db.delete(ordersTable).where(eq(ordersTable.id, o.id));
+  }
+  res.json({ deleted: orders.length, message: `Se eliminaron ${orders.length} pedidos` });
+});
+
 router.post("/bulk-price-update", async (req, res) => {
   const { type, value, categoryId } = req.body;
   const allProducts = categoryId

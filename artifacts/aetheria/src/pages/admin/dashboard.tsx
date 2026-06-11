@@ -1,7 +1,9 @@
 import { useGetDashboardMetrics, useGetTopProducts, useGetSalesByDay, useGetLowStockProducts } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, ResponsiveContainer } from "recharts";
-import { TrendingUp, ShoppingBag, Package, Users, AlertTriangle, DollarSign } from "lucide-react";
+import { TrendingUp, ShoppingBag, Package, Users, AlertTriangle, DollarSign, Trash2 } from "lucide-react";
 
 function MetricCard({ label, value, icon: Icon, sub }: { label: string; value: string; icon: React.ElementType; sub?: string }) {
   return (
@@ -21,6 +23,8 @@ export function AdminDashboard() {
   const { data: topProducts } = useGetTopProducts();
   const { data: salesByDay } = useGetSalesByDay();
   const { data: lowStock } = useGetLowStockProducts();
+  const queryClient = useQueryClient();
+  const [clearing, setClearing] = useState(false);
 
   const chartData = (salesByDay ?? []).slice(-14).map((d) => ({
     date: d.date.slice(5),
@@ -34,6 +38,31 @@ export function AdminDashboard() {
         <div>
           <h1 className="text-2xl font-bold tracking-tighter uppercase">Dashboard</h1>
           <p className="text-muted-foreground font-mono text-sm mt-1">Resumen general del negocio</p>
+        </div>
+
+        {/* Clear Orders */}
+        <div className="flex justify-end">
+          <button
+            onClick={async () => {
+              setClearing(true);
+              try {
+                const res = await fetch("/api/admin/orders", {
+                  method: "DELETE",
+                  headers: { Authorization: "Bearer aetheria-admin-token-secret" },
+                });
+                const data = await res.json();
+                alert(data.message);
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+              } finally {
+                setClearing(false);
+              }
+            }}
+            disabled={clearing}
+            className="flex items-center gap-2 h-9 px-4 border border-destructive/50 text-destructive font-mono text-xs uppercase tracking-widest hover:bg-destructive/10 transition-colors disabled:opacity-50"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            {clearing ? "Limpiando..." : "Limpiar pedidos de prueba"}
+          </button>
         </div>
 
         {isLoading ? (
@@ -61,15 +90,15 @@ export function AdminDashboard() {
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorVentas" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(266 100% 50%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(266 100% 50%)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(340 80% 60%)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(340 80% 60%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 15%)" />
                 <XAxis dataKey="date" tick={{ fontSize: 10, fontFamily: "Space Mono", fill: "hsl(0 0% 45%)" }} />
                 <YAxis tick={{ fontSize: 10, fontFamily: "Space Mono", fill: "hsl(0 0% 45%)" }} />
                 <Tooltip contentStyle={{ background: "hsl(0 0% 8%)", border: "1px solid hsl(0 0% 15%)", borderRadius: 0, fontFamily: "Space Mono", fontSize: 11 }} />
-                <Area type="monotone" dataKey="ventas" stroke="hsl(266 100% 50%)" strokeWidth={2} fill="url(#colorVentas)" name="Ventas ($)" />
+                <Area type="monotone" dataKey="ventas" stroke="hsl(340 80% 60%)" strokeWidth={2} fill="url(#colorVentas)" name="Ventas ($)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -82,7 +111,7 @@ export function AdminDashboard() {
                 <XAxis dataKey="name" tick={{ fontSize: 9, fontFamily: "Space Mono", fill: "hsl(0 0% 45%)" }} />
                 <YAxis tick={{ fontSize: 10, fontFamily: "Space Mono", fill: "hsl(0 0% 45%)" }} />
                 <Tooltip contentStyle={{ background: "hsl(0 0% 8%)", border: "1px solid hsl(0 0% 15%)", borderRadius: 0, fontFamily: "Space Mono", fontSize: 11 }} />
-                <Bar dataKey="vendidos" fill="hsl(266 100% 50%)" name="Vendidos" />
+                <Bar dataKey="vendidos" fill="hsl(340 80% 60%)" name="Vendidos" />
               </BarChart>
             </ResponsiveContainer>
           </div>
