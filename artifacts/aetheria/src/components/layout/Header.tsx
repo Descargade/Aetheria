@@ -14,7 +14,7 @@ import { RegisterDialog } from "@/components/auth/RegisterDialog";
 export function Header() {
   const { theme, setTheme } = useTheme();
   const { sessionId } = useSession();
-  const { user, logout } = useAuth();
+  const { user, logout, login, register } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
@@ -198,8 +198,8 @@ export function Header() {
         </div>
       </div>
 
-      <LoginDialog open={showLogin} onOpenChange={setShowLogin} onSwitchToRegister={() => { setShowLogin(false); setShowRegister(true); }} />
-      <RegisterDialog open={showRegister} onOpenChange={setShowRegister} onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true); }} />
+      <LoginDialog open={showLogin} onOpenChange={setShowLogin} onLogin={login} onSwitchToRegister={() => { setShowLogin(false); setShowRegister(true); }} />
+      <RegisterDialog open={showRegister} onOpenChange={setShowRegister} onRegister={register} onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true); }} />
     </header>
   );
 }

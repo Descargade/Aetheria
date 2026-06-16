@@ -359,6 +359,9 @@ export interface Promotion {
   endDate?: string | null;
   /** @nullable */
   badge?: string | null;
+  showInBanner?: boolean;
+  /** @nullable */
+  bannerText?: string | null;
 }
 
 export type PromotionInputDiscountType = typeof PromotionInputDiscountType[keyof typeof PromotionInputDiscountType];
@@ -416,6 +419,8 @@ export interface ShippingMethod {
   /** @nullable */
   estimatedDays?: string | null;
   active?: boolean;
+  /** @nullable */
+  provider?: string | null;
 }
 
 export interface ShippingMethodInput {
@@ -608,6 +613,10 @@ export interface SizeGuide {
   /** @nullable */
   imageObjectPath?: string | null;
   active?: boolean;
+  /** @nullable */
+  categoryId?: number | null;
+  /** @nullable */
+  sizes?: Record<string, string>[];
 }
 
 export type SizeGuideInputTableData = { [key: string]: unknown };

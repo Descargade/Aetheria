@@ -159,7 +159,7 @@ router.delete("/:itemId", async (req, res) => {
 router.delete("/clear", async (req, res) => {
   const { sessionId } = req.query;
   if (!sessionId) return res.status(400).json({ error: "sessionId required" });
-  await db.delete(cartItemsTable).where(eq(cartItemsTable.id, String(sessionId)));
+  await db.delete(cartItemsTable).where(eq(cartItemsTable.sessionId, String(sessionId)));
   res.status(204).send();
 });
 

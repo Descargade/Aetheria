@@ -1,5 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useCallback, createContext, useContext } from "react";
 
 interface User {
   id: number;
@@ -9,112 +8,110 @@ interface User {
   phone: string | null;
 }
 
-interface AuthContextType {
+interface AuthState {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (data: { email: string; password: string; firstName?: string; lastName?: string; phone?: string }) => Promise<void>;
-  logout: () => void;
   isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const STORAGE_KEY = "aetheria_auth";
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem("aetheria_auth_token"));
-  const [isLoading, setIsLoading] = useState(true);
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    const initAuth = async () => {
-      const storedToken = localStorage.getItem("aetheria_auth_token");
-      if (storedToken) {
-        try {
-          const res = await fetch("/api/auth/me", {
-            headers: { Authorization: `Bearer ${storedToken}` },
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.success && data.user) {
-              setUser(data.user);
-            } else {
-              localStorage.removeItem("aetheria_auth_token");
-            }
-          } else {
-            localStorage.removeItem("aetheria_auth_token");
-          }
-        } catch {
-          localStorage.removeItem("aetheria_auth_token");
-        }
-      }
-      setIsLoading(false);
-    };
-    initAuth();
-  }, []);
-
-  const loginMutation = useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? "Error al iniciar sesión");
-      return data;
-    },
-    onSuccess: (data) => {
-      localStorage.setItem("aetheria_auth_token", data.token);
-      setToken(data.token);
-      setUser(data.user);
-    },
-  });
-
-  const registerMutation = useMutation({
-    mutationFn: async (data: { email: string; password: string; firstName?: string; lastName?: string; phone?: string }) => {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message ?? "Error al registrarse");
-      return result;
-    },
-    onSuccess: (data) => {
-      localStorage.setItem("aetheria_auth_token", data.token);
-      setToken(data.token);
-      setUser(data.user);
-    },
-  });
-
-  const login = async (email: string, password: string) => {
-    await loginMutation.mutateAsync({ email, password });
-  };
-
-  const register = async (data: { email: string; password: string; firstName?: string; lastName?: string; phone?: string }) => {
-    await registerMutation.mutateAsync(data);
-  };
-
-  const logout = () => {
-    localStorage.removeItem("aetheria_auth_token");
-    setToken(null);
-    setUser(null);
-    queryClient.clear();
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isLoading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+function getStoredAuth(): { user: User | null; token: string | null } {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return { user: parsed.user, token: parsed.token };
+    }
+  } catch {}
+  return { user: null, token: null };
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const [state, setState] = useState<AuthState>(() => {
+    const { user, token } = getStoredAuth();
+    return { user, token, isLoading: true };
+  });
+
+  useEffect(() => {
+    const { user, token } = getStoredAuth();
+    if (token && !user) {
+      fetch("/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success && data.user) {
+            setState({ user: data.user, token, isLoading: false });
+          } else {
+            localStorage.removeItem(STORAGE_KEY);
+            setState({ user: null, token: null, isLoading: false });
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem(STORAGE_KEY);
+          setState({ user: null, token: null, isLoading: false });
+        });
+    } else {
+      setState((prev) => ({ ...prev, isLoading: false }));
+    }
+  }, []);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || "Error al iniciar sesión");
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: data.user, token: data.token }));
+    setState({ user: data.user, token: data.token, isLoading: false });
+    return data.user;
+  }, []);
+
+  const register = useCallback(async (payload: { email: string; password: string; firstName?: string; lastName?: string; phone?: string }) => {
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || "Error al registrar");
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: data.user, token: data.token }));
+    setState({ user: data.user, token: data.token, isLoading: false });
+    return data.user;
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setState({ user: null, token: null, isLoading: false });
+  }, []);
+
+  return {
+    user: state.user,
+    token: state.token,
+    isLoading: state.isLoading,
+    isAuthenticated: !!state.user,
+    login,
+    register,
+    logout,
+  };
+}
+
+const AuthContext = createContext<ReturnType<typeof useAuth> | null>(null);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const auth = useAuth();
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+}
+
+export function useAuthContext() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuthContext must be used within AuthProvider");
+  return ctx;
 }

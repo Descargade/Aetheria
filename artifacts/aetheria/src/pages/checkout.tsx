@@ -48,7 +48,10 @@ export function Checkout() {
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [couponMsg, setCouponMsg] = useState("");
   const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quote, setQuote] = useState<ShipQuote | null>(null);
   const [notes, setNotes] = useState("");
+  const [newsletter, setNewsletter] = useState(false);
+  const [useBillingData, setUseBillingData] = useState(true);
 
   const { data: cart } = useGetCart({ sessionId }, { query: { enabled: !!sessionId, queryKey: getGetCartQueryKey({ sessionId }) } });
   const { data: shippingMethods } = useGetShippingMethods();

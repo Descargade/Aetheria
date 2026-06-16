@@ -20,7 +20,7 @@ export function AnnouncementBar() {
 
   if (!items || items.length === 0) return null;
 
-  const bannerText = items.map((i) => i.text).join(" · ");
+  const bannerText = items.map((i) => i.text).join(" | ");
 
   return (
     <div className="bg-primary text-primary-foreground text-[10px] md:text-[11px] font-mono uppercase tracking-[0.2em] h-8 flex items-center justify-center text-center px-4 overflow-hidden">
