@@ -139,7 +139,8 @@ export function ProductDetail() {
       toast({ title: "Seleccioná un color", variant: "destructive" });
       return;
     }
-    if (availableSizes.length > 0 && !selectedSize) {
+    const hasSizes = availableSizes.length > 0 || (product.sizes && product.sizes.length > 0);
+    if (hasSizes && !selectedSize) {
       toast({ title: "Seleccioná un talle", variant: "destructive" });
       return;
     }

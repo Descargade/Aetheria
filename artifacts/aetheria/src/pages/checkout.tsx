@@ -32,7 +32,6 @@ const PROVINCES = ["Buenos Aires","CABA","Catamarca","Chaco","Chubut","Córdoba"
 interface ShipQuote {
   price: number;
   estimatedDays: string;
-  provider: string;
   methodName: string;
 }
 
@@ -53,7 +52,7 @@ export function Checkout() {
   const [newsletter, setNewsletter] = useState(false);
   const [useBillingData, setUseBillingData] = useState(true);
 
-  const { data: cart } = useGetCart({ sessionId }, { query: { enabled: !!sessionId, queryKey: getGetCartQueryKey({ sessionId }) } });
+  const { data: cart } = useGetCart({ sessionId, couponCode: appliedCoupon ?? undefined }, { query: { enabled: !!sessionId, queryKey: getGetCartQueryKey({ sessionId, couponCode: appliedCoupon ?? undefined }) } });
   const { data: shippingMethods } = useGetShippingMethods();
   const { data: paymentMethods } = useGetPaymentMethods();
   const createOrder = useCreateOrder();
@@ -195,7 +194,7 @@ export function Checkout() {
                               {quoteLoading && selectedShipping === method.id ? (
                                 <span className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" />Cotizando...</span>
                               ) : selectedShipping === method.id && quote ? (
-                                <p className="text-xs text-muted-foreground mt-0.5">{quote.estimatedDays} · {quote.provider}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{quote.estimatedDays}</p>
                               ) : (
                                 <p className="text-xs text-muted-foreground mt-0.5">{method.estimatedDays}</p>
                               )}

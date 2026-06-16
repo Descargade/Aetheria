@@ -72,14 +72,14 @@ async function buildCart(sessionId: string, couponCode?: string | null, shipping
 }
 
 router.get("/", async (req, res) => {
-  const { sessionId, shippingMethodId, postalCode, province } = req.query;
+  const { sessionId, couponCode, shippingMethodId, postalCode, province } = req.query;
   if (!sessionId) return res.status(400).json({ error: "sessionId required" });
   const shipping = shippingMethodId ? { shippingMethodId: Number(shippingMethodId), postalCode: String(postalCode ?? ""), province: String(province ?? "") } : undefined;
-  res.json(await buildCart(String(sessionId), undefined, shipping));
+  res.json(await buildCart(String(sessionId), couponCode ? String(couponCode) : undefined, shipping));
 });
 
 router.post("/", async (req, res) => {
-  const { sessionId, productId, quantity, selectedSize, selectedColor } = req.body;
+  const { sessionId, productId, quantity, selectedSize, selectedColor, couponCode } = req.body;
   const [product] = await db.select().from(productsTable).where(eq(productsTable.id, productId));
   if (!product) return res.status(404).json({ error: "Product not found" });
 
@@ -124,11 +124,11 @@ router.post("/", async (req, res) => {
     await db.insert(cartItemsTable).values({ sessionId, productId, quantity, selectedSize, selectedColor, price: String(price) });
   }
 
-  res.json(await buildCart(sessionId));
+  res.json(await buildCart(sessionId, couponCode));
 });
 
 router.patch("/:itemId", async (req, res) => {
-  const { quantity } = req.body;
+  const { quantity, couponCode } = req.body;
   const [item] = await db.select().from(cartItemsTable).where(eq(cartItemsTable.id, Number(req.params.itemId)));
   if (!item) return res.status(404).json({ error: "Not found" });
 
@@ -148,21 +148,22 @@ router.patch("/:itemId", async (req, res) => {
   } else {
     await db.update(cartItemsTable).set({ quantity }).where(eq(cartItemsTable.id, item.id));
   }
-  res.json(await buildCart(item.sessionId));
+  res.json(await buildCart(item.sessionId, couponCode));
 });
 
 router.delete("/:itemId", async (req, res) => {
+  const couponCode = req.query.couponCode as string | undefined;
   const [item] = await db.select().from(cartItemsTable).where(eq(cartItemsTable.id, Number(req.params.itemId)));
   if (!item) return res.status(404).json({ error: "Not found" });
   await db.delete(cartItemsTable).where(eq(cartItemsTable.id, item.id));
-  res.json(await buildCart(item.sessionId));
+  res.json(await buildCart(item.sessionId, couponCode));
 });
 
 router.delete("/clear", async (req, res) => {
-  const { sessionId } = req.query;
+  const { sessionId, couponCode } = req.query;
   if (!sessionId) return res.status(400).json({ error: "sessionId required" });
   await db.delete(cartItemsTable).where(eq(cartItemsTable.sessionId, String(sessionId)));
-  res.status(204).send();
+  res.status(204).json(await buildCart(String(sessionId), couponCode ? String(couponCode) : undefined));
 });
 
 router.post("/apply-coupon", async (req, res) => {

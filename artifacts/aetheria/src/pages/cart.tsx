@@ -1,11 +1,10 @@
 import { Link, useLocation } from "wouter";
-import { useGetCart, useRemoveFromCart, useUpdateCartItem, getGetCartQueryKey } from "@workspace/api-client-react";
+import { useGetCart, useRemoveFromCart, useUpdateCartItem, useApplyCoupon, getGetCartQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { PLACEHOLDER_IMAGE } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSession } from "@/hooks/use-session";
-import { Trash2, Plus, Minus, Truck, Tag, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, Plus, Minus, Tag, ArrowRight, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,15 +13,15 @@ export function Cart() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [showShipping, setShowShipping] = useState(false);
-  const [showDiscount, setShowDiscount] = useState(false);
-  const [postalCode, setPostalCode] = useState("");
-  const [couponCode, setCouponCode] = useState("");
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [couponMsg, setCouponMsg] = useState("");
 
-  const { data: cart, isLoading } = useGetCart({ sessionId }, { query: { enabled: !!sessionId, queryKey: getGetCartQueryKey({ sessionId }) } });
+  const { data: cart, isLoading } = useGetCart({ sessionId, couponCode: appliedCoupon ?? undefined }, { query: { enabled: !!sessionId, queryKey: getGetCartQueryKey({ sessionId, couponCode: appliedCoupon ?? undefined }) } });
 
   const updateItem = useUpdateCartItem();
   const removeItem = useRemoveFromCart();
+  const applyCouponMutation = useApplyCoupon();
 
   const handleUpdateQuantity = (itemId: number, newQuantity: number, availableStock: number) => {
     if (newQuantity < 1) return;
@@ -30,16 +29,33 @@ export function Cart() {
       toast({ title: "Stock insuficiente", description: `Solo hay ${availableStock} unidades disponibles`, variant: "destructive" });
       return;
     }
-    updateItem.mutate({ itemId, data: { quantity: newQuantity } }, {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetCartQueryKey({ sessionId }) }),
+    updateItem.mutate({ itemId, data: { quantity: newQuantity, couponCode: appliedCoupon ?? undefined } }, {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetCartQueryKey({ sessionId, couponCode: appliedCoupon ?? undefined }) }),
     });
   };
 
   const handleRemove = (itemId: number) => {
-    removeItem.mutate({ itemId }, {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetCartQueryKey({ sessionId }) }),
+    removeItem.mutate({ itemId, params: { couponCode: appliedCoupon ?? undefined } }, {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetCartQueryKey({ sessionId, couponCode: appliedCoupon ?? undefined }) }),
     });
   };
+
+  const handleApplyCoupon = () => {
+    if (!couponInput.trim()) return;
+    setCouponMsg("");
+    applyCouponMutation.mutate({ data: { sessionId, code: couponInput } }, {
+      onSuccess: (result: any) => {
+        if (result.valid) {
+          setAppliedCoupon(couponInput);
+          setCouponMsg("Cupón aplicado");
+        } else {
+          setCouponMsg(result.message ?? "Cupón inválido");
+        }
+      },
+    });
+  };
+
+  const couponDiscount = cart?.discount ?? 0;
 
   if (isLoading) {
     return (
@@ -133,34 +149,25 @@ export function Cart() {
                 <span className="text-foreground font-bold">${cart.subtotal.toLocaleString("es-AR")}</span>
               </div>
 
-              {/* Shipping calculator */}
-              <div className="border-t border-border pt-3">
-                <button onClick={() => setShowShipping(!showShipping)} className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors w-full text-left">
-                  <Truck className="h-3 w-3" />
-                  Calculá el costo de envío
-                  {showShipping ? <ChevronUp className="h-3 w-3 ml-auto" /> : <ChevronDown className="h-3 w-3 ml-auto" />}
-                </button>
-                {showShipping && (
-                  <div className="mt-3 flex gap-2">
-                    <Input value={postalCode} onChange={(e) => setPostalCode(e.target.value)} placeholder="Código postal" className="rounded-none h-10 font-mono text-sm bg-background border-border" />
-                    <Button variant="outline" className="rounded-none font-mono uppercase text-xs h-10 border-border shrink-0">CALCULAR</Button>
-                  </div>
-                )}
-              </div>
+              {couponDiscount > 0 && (
+                <div className="flex justify-between text-primary">
+                  <span>Descuento</span>
+                  <span>-${couponDiscount.toLocaleString("es-AR")}</span>
+                </div>
+              )}
 
               {/* Discount code */}
               <div className="border-t border-border pt-3">
-                <button onClick={() => setShowDiscount(!showDiscount)} className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors w-full text-left">
-                  <Tag className="h-3 w-3" />
-                  ¿Tenés un descuento?
-                  {showDiscount ? <ChevronUp className="h-3 w-3 ml-auto" /> : <ChevronDown className="h-3 w-3 ml-auto" />}
-                </button>
-                {showDiscount && (
-                  <div className="mt-3 flex gap-2">
-                    <Input value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="Código" className="rounded-none h-10 font-mono text-sm bg-background border-border" />
-                    <Button variant="outline" className="rounded-none font-mono uppercase text-xs h-10 border-border shrink-0">APLICAR</Button>
-                  </div>
-                )}
+                <div className="flex gap-2">
+                  <Input value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Código de descuento"
+                    className="rounded-none h-10 font-mono text-sm bg-background border-border"
+                    onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()} />
+                  <Button variant="outline" onClick={handleApplyCoupon} disabled={applyCouponMutation.isPending}
+                    className="rounded-none font-mono uppercase text-xs h-10 border-border shrink-0">
+                    {applyCouponMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "APLICAR"}
+                  </Button>
+                </div>
+                {couponMsg && <p className={`text-xs font-mono mt-1 ${appliedCoupon ? "text-primary" : "text-destructive"}`}>{couponMsg}</p>}
               </div>
             </div>
 

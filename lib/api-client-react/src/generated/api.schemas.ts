@@ -153,6 +153,7 @@ export interface CartItemInput {
 
 export interface CartItemUpdate {
   quantity: number;
+  couponCode?: string;
 }
 
 export interface CouponApply {
@@ -682,6 +683,7 @@ sessionId: string;
 
 export type GetCartParams = {
 sessionId: string;
+couponCode?: string;
 };
 
 export type ClearCartParams = {
