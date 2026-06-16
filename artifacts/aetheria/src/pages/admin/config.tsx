@@ -35,9 +35,11 @@ interface PickupConfig {
 export function AdminConfig() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [tab, setTab] = useState<"shipping" | "payment" | "prices" | "providers">("shipping");
+  const [tab, setTab] = useState<"shipping" | "payment" | "prices" | "providers" | "store">("shipping");
   const [bulkType, setBulkType] = useState("increase_percentage");
   const [bulkValue, setBulkValue] = useState("");
+  const [storeConfig, setStoreConfig] = useState({ alias: "", cvu: "", titular: "", cuit: "" });
+  const [storeConfigLoading, setStoreConfigLoading] = useState(false);
 
   const { data: shippingMethods } = useGetShippingMethods();
   const { data: paymentMethods } = useGetPaymentMethods();
@@ -60,7 +62,29 @@ export function AdminConfig() {
     fetch("/api/shipping/providers").then((r) => r.json()).then(setProviders).catch(() => {});
     fetch("/api/shipping/providers/available").then((r) => r.json()).then(setAvailableProviders).catch(() => {});
     fetch("/api/shipping/pickup-config").then((r) => r.json()).then(setPickupConfig).catch(() => {});
+    fetch("/api/store-config/bank-data").then((r) => r.json()).then(setStoreConfig).catch(() => {});
   }, []);
+
+  const handleSaveStoreConfig = async () => {
+    setStoreConfigLoading(true);
+    try {
+      await fetch("/api/store-config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bank_alias: storeConfig.alias,
+          bank_cvu: storeConfig.cvu,
+          bank_titular: storeConfig.titular,
+          bank_cuit: storeConfig.cuit,
+        }),
+      });
+      toast({ title: "Datos bancarios guardados" });
+    } catch {
+      toast({ title: "Error al guardar", variant: "destructive" });
+    } finally {
+      setStoreConfigLoading(false);
+    }
+  };
 
   const handleSaveProvider = async (p: ShippingProvider) => {
     const url = p.id ? `/api/shipping/providers/${p.id}` : "/api/shipping/providers";
@@ -108,9 +132,9 @@ export function AdminConfig() {
         <h1 className="text-2xl font-bold tracking-tighter uppercase">Configuración</h1>
 
         <div className="flex border-b border-border">
-          {(["shipping","payment","prices","providers"] as const).map((t) => (
+          {(["shipping","payment","prices","providers","store"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)} className={`px-6 py-3 font-mono text-xs uppercase tracking-widest border-b-2 transition-colors ${tab === t ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-              {t === "shipping" ? "Métodos de envío" : t === "payment" ? "Métodos de pago" : t === "prices" ? "Precios masivos" : "Proveedores"}
+              {t === "shipping" ? "Métodos de envío" : t === "payment" ? "Métodos de pago" : t === "prices" ? "Precios masivos" : t === "providers" ? "Proveedores" : "Datos de la tienda"}
             </button>
           ))}
         </div>
@@ -275,6 +299,33 @@ export function AdminConfig() {
               </div>
               <Button onClick={handleBulkUpdate} disabled={!bulkValue || bulkPrice.isPending} className="w-full h-12 rounded-none font-mono uppercase tracking-widest bg-primary text-white hover:bg-primary/80 border-none">
                 {bulkPrice.isPending ? "Actualizando..." : "Aplicar ajuste de precios"}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {tab === "store" && (
+          <div className="max-w-lg space-y-6">
+            <p className="font-mono text-sm text-muted-foreground">Datos bancarios que se muestran al cliente al confirmar un pedido con transferencia.</p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Alias</label>
+                <Input value={storeConfig.alias} onChange={(e) => setStoreConfig({ ...storeConfig, alias: e.target.value })} placeholder="mi.alias" className="rounded-none h-10 font-mono text-sm bg-background border-border" />
+              </div>
+              <div>
+                <label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">CVU</label>
+                <Input value={storeConfig.cvu} onChange={(e) => setStoreConfig({ ...storeConfig, cvu: e.target.value })} placeholder="0000000000000000000000" className="rounded-none h-10 font-mono text-sm bg-background border-border" />
+              </div>
+              <div>
+                <label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Titular de la cuenta</label>
+                <Input value={storeConfig.titular} onChange={(e) => setStoreConfig({ ...storeConfig, titular: e.target.value })} placeholder="Nombre y apellido" className="rounded-none h-10 font-mono text-sm bg-background border-border" />
+              </div>
+              <div>
+                <label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">CUIT (opcional)</label>
+                <Input value={storeConfig.cuit} onChange={(e) => setStoreConfig({ ...storeConfig, cuit: e.target.value })} placeholder="XX-XXXXXXXX-X" className="rounded-none h-10 font-mono text-sm bg-background border-border" />
+              </div>
+              <Button onClick={handleSaveStoreConfig} disabled={storeConfigLoading} className="w-full h-12 rounded-none font-mono uppercase tracking-widest bg-primary text-white hover:bg-primary/80 border-none">
+                {storeConfigLoading ? "Guardando..." : "Guardar datos bancarios"}
               </Button>
             </div>
           </div>

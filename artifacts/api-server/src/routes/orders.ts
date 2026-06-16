@@ -236,6 +236,19 @@ router.patch("/:id", async (req, res) => {
     });
   }
 
+  // Send shipped email when admin marks as enviado
+  if (req.body.status === "enviado") {
+    const { sendOrderShippedToCustomer } = await import("../mail");
+    sendOrderShippedToCustomer({
+      id: order.id,
+      firstName: order.firstName,
+      lastName: order.lastName,
+      email: order.email,
+      shippingMethodName: sm?.name ?? null,
+      trackingCode: req.body.trackingCode ?? null,
+    });
+  }
+
   res.json(buildOrder(order, items, pm?.name, sm?.name));
 });
 

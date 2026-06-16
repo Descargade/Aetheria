@@ -15,6 +15,7 @@ import variantsRouter from "./variants";
 import sizeGuidesRouter from "./size-guides";
 import authRouter from "./auth";
 import bannerRouter from "./banner";
+import storeConfigRouter from "./store-config";
 
 const router: IRouter = Router();
 
@@ -34,5 +35,6 @@ router.use("/payment-methods", paymentsRouter);
 router.use("/admin", adminRouter);
 router.use("/variants", variantsRouter);
 router.use("/size-guides", sizeGuidesRouter);
+router.use("/store-config", storeConfigRouter);
 
 export default router;

@@ -198,3 +198,44 @@ export async function sendOrderConfirmedToCustomer(order: {
     console.error("Failed to send order confirmed email:", err);
   }
 }
+
+export async function sendOrderShippedToCustomer(order: {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  shippingMethodName?: string | null;
+  trackingCode?: string | null;
+}) {
+  const resend = getResend();
+  if (!resend) return;
+
+  const html = baseHtml(`
+    <p style="font-size:16px;color:#333;margin:0 0 4px">¡Hola ${order.firstName}! 🚚</p>
+    <p style="font-size:14px;color:#666;margin:0 0 24px">Tu pedido <strong>#${order.id}</strong> ya fue <strong style="color:#1565c0">enviado</strong>.</p>
+
+    <p style="font-size:14px;color:#333;margin-bottom:24px">Tu compra está en camino. A continuación tenés los datos del envío:</p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;background:#f9f9f9;border:1px solid #eee">
+      <tr><td style="font-size:12px;color:#888;padding:12px 16px 4px;text-transform:uppercase;letter-spacing:1px" colspan="2">Datos del envío</td></tr>
+      ${order.shippingMethodName ? `<tr><td style="padding:8px 16px;font-size:14px;color:#333">Método:</td><td style="padding:8px 16px;font-size:14px;color:#333">${order.shippingMethodName}</td></tr>` : ""}
+      ${order.trackingCode ? `<tr><td style="padding:8px 16px;font-size:14px;color:#333">Tracking:</td><td style="padding:8px 16px;font-size:14px;color:#333;font-weight:bold">${order.trackingCode}</td></tr>` : ""}
+    </table>
+
+    <p style="font-size:12px;color:#999;text-align:center;margin:0;padding-top:16px;border-top:1px solid #eee">
+      AETHERIA — Gracias por tu compra ❤️
+    </p>
+  `);
+
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: order.email,
+      subject: `Pedido #${order.id} enviado — AETHERIA 🚚`,
+      html,
+    });
+    console.log(`Order shipped email sent to customer #${order.id}`);
+  } catch (err) {
+    console.error("Failed to send order shipped email:", err);
+  }
+}

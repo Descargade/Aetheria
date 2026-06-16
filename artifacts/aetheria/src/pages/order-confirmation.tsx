@@ -7,6 +7,13 @@ import { CheckCircle, Copy, ChevronRight } from "lucide-react";
 import { ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+interface BankData {
+  alias: string | null;
+  cvu: string | null;
+  titular: string | null;
+  cuit: string | null;
+}
+
 export function OrderConfirmation() {
   const params = useParams<{ orderId: string }>();
   const [, setLocation] = useLocation();
@@ -19,6 +26,15 @@ export function OrderConfirmation() {
     queryFn: async () => {
       const res = await fetch(`/api/orders/${params.orderId}`);
       if (!res.ok) throw new Error("Not found");
+      return res.json();
+    },
+  });
+
+  const { data: bankData } = useQuery({
+    queryKey: ["bankData"],
+    queryFn: async (): Promise<BankData> => {
+      const res = await fetch("/api/store-config/bank-data");
+      if (!res.ok) return { alias: null, cvu: null, titular: null, cuit: null };
       return res.json();
     },
   });
@@ -72,35 +88,51 @@ export function OrderConfirmation() {
       </p>
 
       {/* Transfer data */}
-      <div className="bg-primary/5 border border-primary/20 p-6 mb-8">
-        <h3 className="font-mono text-xs uppercase tracking-widest text-primary font-bold mb-4">Datos para transferencia</h3>
-        <div className="space-y-3 font-mono text-sm">
-          <div className="flex items-center justify-between bg-background border border-border p-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Alias</p>
-              <p className="font-bold">aetheria.tienda</p>
-            </div>
-            <button onClick={() => handleCopy("aetheria.tienda", "Alias")} className="text-primary hover:underline text-xs flex items-center gap-1">
-              <Copy className="h-3 w-3" /> Copiar
-            </button>
-          </div>
-          <div className="flex items-center justify-between bg-background border border-border p-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">CVU</p>
-              <p className="font-bold text-xs">0000003100088888888888</p>
-            </div>
-            <button onClick={() => handleCopy("0000003100088888888888", "CVU")} className="text-primary hover:underline text-xs flex items-center gap-1">
-              <Copy className="h-3 w-3" /> Copiar
-            </button>
-          </div>
-          <div className="flex items-center justify-between bg-background border border-border p-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Titular</p>
-              <p className="font-bold">Mercado Pago</p>
-            </div>
+      {(bankData?.alias || bankData?.cvu) && (
+        <div className="bg-primary/5 border border-primary/20 p-6 mb-8">
+          <h3 className="font-mono text-xs uppercase tracking-widest text-primary font-bold mb-4">Datos para transferencia</h3>
+          <div className="space-y-3 font-mono text-sm">
+            {bankData.alias && (
+              <div className="flex items-center justify-between bg-background border border-border p-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Alias</p>
+                  <p className="font-bold">{bankData.alias}</p>
+                </div>
+                <button onClick={() => handleCopy(bankData.alias!, "Alias")} className="text-primary hover:underline text-xs flex items-center gap-1">
+                  <Copy className="h-3 w-3" /> Copiar
+                </button>
+              </div>
+            )}
+            {bankData.cvu && (
+              <div className="flex items-center justify-between bg-background border border-border p-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">CVU</p>
+                  <p className="font-bold text-xs">{bankData.cvu}</p>
+                </div>
+                <button onClick={() => handleCopy(bankData.cvu!, "CVU")} className="text-primary hover:underline text-xs flex items-center gap-1">
+                  <Copy className="h-3 w-3" /> Copiar
+                </button>
+              </div>
+            )}
+            {bankData.titular && (
+              <div className="flex items-center justify-between bg-background border border-border p-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Titular</p>
+                  <p className="font-bold">{bankData.titular}</p>
+                </div>
+              </div>
+            )}
+            {bankData.cuit && (
+              <div className="flex items-center justify-between bg-background border border-border p-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">CUIT</p>
+                  <p className="font-bold">{bankData.cuit}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Order info */}
       <div className="border border-border divide-y divide-border mb-8">
