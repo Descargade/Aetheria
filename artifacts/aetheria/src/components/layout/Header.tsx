@@ -11,7 +11,7 @@ import { SearchBar } from "@/components/layout/SearchBar";
 import { LoginDialog } from "@/components/auth/LoginDialog";
 import { RegisterDialog } from "@/components/auth/RegisterDialog";
 
-export function Header() {
+export function Header({ checkoutMode = false }: { checkoutMode?: boolean }) {
   const { theme, setTheme } = useTheme();
   const { sessionId } = useSession();
   const { user, logout, login, register } = useAuth();
@@ -27,6 +27,18 @@ export function Header() {
 
   const cartItemsCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const favoritesCount = favorites?.length || 0;
+
+  if (checkoutMode) {
+    return (
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 md:px-8 h-16 flex items-center justify-center">
+          <Link href="/">
+            <span className="font-sans font-bold text-2xl tracking-tighter cursor-pointer hover:text-primary transition-colors">Aᴇᴛʜᴇʀɪᴀ</span>
+          </Link>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">

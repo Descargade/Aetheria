@@ -28,6 +28,7 @@ export function AdminProducts() {
   const [form, setForm] = useState<ProductForm>(defaultForm);
   const [variantProductId, setVariantProductId] = useState<number | null>(null);
   const [variantProductName, setVariantProductName] = useState("");
+  const [sortLoading, setSortLoading] = useState(false);
 
   const { data: products, isLoading } = useGetProducts({ search: search || undefined });
   const { data: categories } = useGetCategories();
@@ -88,12 +89,24 @@ export function AdminProducts() {
     const b = sortedProducts[swapIdx];
     const aOrder = a.sortOrder ?? 0;
     const bOrder = b.sortOrder ?? 0;
-    await fetch("/api/products/sort-order", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: [{ id: a.id, sortOrder: bOrder }, { id: b.id, sortOrder: aOrder }] }),
-    });
-    invalidate();
+    setSortLoading(true);
+    try {
+      const res = await fetch("/api/products/sort-order", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: [{ id: a.id, sortOrder: bOrder }, { id: b.id, sortOrder: aOrder }] }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("Sort failed:", err);
+        return;
+      }
+      await invalidate();
+    } catch (err) {
+      console.error("Sort fetch error:", err);
+    } finally {
+      setSortLoading(false);
+    }
   };
 
   const field = (label: string, input: React.ReactNode) => (
@@ -105,9 +118,9 @@ export function AdminProducts() {
 
   return (
     <AdminLayout>
-      <div className="p-6 md:p-8 space-y-6">
+      <div className="p-4 md:p-8 space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tighter uppercase">Productos</h1>
+          <h1 className="text-xl md:text-2xl font-bold tracking-tighter uppercase">Productos</h1>
           <Button onClick={openCreate} className="rounded-none font-mono uppercase text-xs tracking-widest bg-primary text-white hover:bg-primary/80 border-none h-10">
             <Plus className="h-4 w-4 mr-2" />Nuevo
           </Button>
@@ -170,41 +183,107 @@ export function AdminProducts() {
           </div>
         )}
 
-        {/* Table */}
+        {/* Product list */}
         <div className="border border-border">
-          <div className="hidden md:grid grid-cols-[2fr_1fr_100px_100px_100px_100px] gap-4 px-4 py-3 border-b border-border bg-muted/20 text-xs font-mono uppercase tracking-widest text-muted-foreground">
-            <span>Nombre</span><span>Categoría</span><span>Precio</span><span>Stock</span><span>Estado</span><span></span>
+          {/* Desktop header */}
+          <div className="hidden md:grid grid-cols-[40px_2fr_1fr_100px_100px_100px_140px] gap-4 px-4 py-3 border-b border-border bg-muted/20 text-xs font-mono uppercase tracking-widest text-muted-foreground">
+            <span>Ord.</span><span>Nombre</span><span>Categoría</span><span>Precio</span><span>Stock</span><span>Estado</span><span></span>
           </div>
           {isLoading && <div className="p-8 text-center"><div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" /></div>}
-          {sortedProducts.map((p) => (
-            <div key={p.id} className="grid grid-cols-2 md:grid-cols-[2fr_1fr_100px_100px_100px_100px] gap-4 px-4 py-3 border-b border-border last:border-0 items-center">
-              <div>
-                <p className="font-mono font-bold text-sm">{p.name}</p>
-                <p className="font-mono text-xs text-muted-foreground">{p.sku}</p>
+          {sortedProducts.map((p, idx) => (
+            <div key={p.id} className="border-b border-border last:border-0">
+              {/* Desktop row */}
+              <div className="hidden md:grid grid-cols-[40px_2fr_1fr_100px_100px_100px_140px] gap-4 px-4 py-3 items-center">
+                <div className="flex flex-col items-center gap-0.5">
+                  <button
+                    onClick={() => handleMove(p.id, "up")}
+                    disabled={idx === 0 || sortLoading}
+                    title="Mover arriba"
+                    className="h-6 w-6 border border-border flex items-center justify-center hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronUp className="h-3 w-3" />
+                  </button>
+                  <span className="font-mono text-[10px] text-muted-foreground">{p.sortOrder ?? 0}</span>
+                  <button
+                    onClick={() => handleMove(p.id, "down")}
+                    disabled={idx === sortedProducts.length - 1 || sortLoading}
+                    title="Mover abajo"
+                    className="h-6 w-6 border border-border flex items-center justify-center hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+                </div>
+                <div>
+                  <p className="font-mono font-bold text-sm">{p.name}</p>
+                  <p className="font-mono text-xs text-muted-foreground">{p.sku}</p>
+                </div>
+                <span className="font-mono text-sm text-muted-foreground">{p.categoryName}</span>
+                <div className="font-mono text-sm">
+                  <p className="font-bold">${Number(p.price).toLocaleString("es-AR")}</p>
+                  {p.salePrice && <p className="text-primary text-xs">${Number(p.salePrice).toLocaleString("es-AR")}</p>}
+                </div>
+                <span className={`font-mono text-xs font-bold ${(p.stock ?? 0) === 0 ? "text-destructive" : (p.stock ?? 0) <= 5 ? "text-yellow-500" : "text-foreground"}`}>{p.stock ?? 0} u.</span>
+                <span className={`font-mono text-xs ${p.active ? "text-emerald-500" : "text-muted-foreground"}`}>{p.active ? "Activo" : "Inactivo"}</span>
+                <div className="flex gap-1.5 justify-end">
+                  <button onClick={() => openVariants(p.id, p.name)} title="Variantes" className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary transition-colors">
+                    <Layers className="h-3 w-3" />
+                  </button>
+                  <button onClick={() => openEdit(p)} className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary transition-colors">
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                  <button onClick={() => handleDelete(p.id)} className="h-8 w-8 border border-border flex items-center justify-center hover:border-destructive hover:text-destructive transition-colors">
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
               </div>
-              <span className="font-mono text-sm text-muted-foreground hidden md:block">{p.categoryName}</span>
-              <div className="font-mono text-sm hidden md:block">
-                <p className="font-bold">${Number(p.price).toLocaleString("es-AR")}</p>
-                {p.salePrice && <p className="text-primary text-xs">${Number(p.salePrice).toLocaleString("es-AR")}</p>}
-              </div>
-              <span className={`font-mono text-xs font-bold hidden md:block ${(p.stock ?? 0) === 0 ? "text-destructive" : (p.stock ?? 0) <= 5 ? "text-yellow-500" : "text-foreground"}`}>{p.stock ?? 0} u.</span>
-              <span className={`font-mono text-xs hidden md:block ${p.active ? "text-emerald-500" : "text-muted-foreground"}`}>{p.active ? "Activo" : "Inactivo"}</span>
-              <div className="flex gap-1.5 justify-end">
-                <button onClick={() => handleMove(p.id, "up")} title="Mover arriba" className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary transition-colors">
-                  <ChevronUp className="h-3 w-3" />
-                </button>
-                <button onClick={() => handleMove(p.id, "down")} title="Mover abajo" className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary transition-colors">
-                  <ChevronDown className="h-3 w-3" />
-                </button>
-                <button onClick={() => openVariants(p.id, p.name)} title="Variantes" className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary transition-colors">
-                  <Layers className="h-3 w-3" />
-                </button>
-                <button onClick={() => openEdit(p)} className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary transition-colors">
-                  <Pencil className="h-3 w-3" />
-                </button>
-                <button onClick={() => handleDelete(p.id)} className="h-8 w-8 border border-border flex items-center justify-center hover:border-destructive hover:text-destructive transition-colors">
-                  <Trash2 className="h-3 w-3" />
-                </button>
+
+              {/* Mobile row */}
+              <div className="md:hidden px-4 py-3 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-mono font-bold text-sm truncate">{p.name}</p>
+                    <p className="font-mono text-xs text-muted-foreground">{p.sku}</p>
+                    <p className="font-mono text-xs text-muted-foreground">{p.categoryName}</p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => handleMove(p.id, "up")}
+                      disabled={idx === 0 || sortLoading}
+                      title="Mover arriba"
+                      className="h-7 w-7 border border-border flex items-center justify-center hover:border-primary hover:text-primary transition-colors disabled:opacity-30"
+                    >
+                      <ChevronUp className="h-3 w-3" />
+                    </button>
+                    <span className="font-mono text-[10px] text-muted-foreground w-4 text-center">{p.sortOrder ?? 0}</span>
+                    <button
+                      onClick={() => handleMove(p.id, "down")}
+                      disabled={idx === sortedProducts.length - 1 || sortLoading}
+                      title="Mover abajo"
+                      className="h-7 w-7 border border-border flex items-center justify-center hover:border-primary hover:text-primary transition-colors disabled:opacity-30"
+                    >
+                      <ChevronDown className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-sm font-bold">${Number(p.price).toLocaleString("es-AR")}</span>
+                    {p.salePrice && <span className="text-primary font-mono text-xs">${Number(p.salePrice).toLocaleString("es-AR")}</span>}
+                    <span className={`font-mono text-xs font-bold ${(p.stock ?? 0) === 0 ? "text-destructive" : (p.stock ?? 0) <= 5 ? "text-yellow-500" : "text-foreground"}`}>{p.stock ?? 0} u.</span>
+                    <span className={`font-mono text-xs ${p.active ? "text-emerald-500" : "text-muted-foreground"}`}>{p.active ? "Activo" : "Inactivo"}</span>
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    <button onClick={() => openVariants(p.id, p.name)} title="Variantes" className="h-7 w-7 border border-border flex items-center justify-center hover:border-primary transition-colors">
+                      <Layers className="h-3 w-3" />
+                    </button>
+                    <button onClick={() => openEdit(p)} className="h-7 w-7 border border-border flex items-center justify-center hover:border-primary transition-colors">
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                    <button onClick={() => handleDelete(p.id)} className="h-7 w-7 border border-border flex items-center justify-center hover:border-destructive hover:text-destructive transition-colors">
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
