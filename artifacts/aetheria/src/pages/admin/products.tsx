@@ -83,25 +83,31 @@ export function AdminProducts() {
   const handleMove = async (productId: number, direction: "up" | "down") => {
     const idx = sortedProducts.findIndex((p) => p.id === productId);
     if (idx < 0) return;
-    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-    if (swapIdx < 0 || swapIdx >= sortedProducts.length) return;
-    const a = sortedProducts[idx];
-    const b = sortedProducts[swapIdx];
-    const aOrder = a.sortOrder ?? 0;
-    const bOrder = b.sortOrder ?? 0;
+    const newIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (newIdx < 0 || newIdx >= sortedProducts.length) return;
+
+    const reordered = [...sortedProducts];
+    const [moved] = reordered.splice(idx, 1);
+    reordered.splice(newIdx, 0, moved);
+
+    const items = reordered.map((p, i) => ({ id: p.id, sortOrder: i }));
+
     setSortLoading(true);
     try {
       const res = await fetch("/api/products/sort-order", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: [{ id: a.id, sortOrder: bOrder }, { id: b.id, sortOrder: aOrder }] }),
+        body: JSON.stringify({ items }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         console.error("Sort failed:", err);
         return;
       }
-      await invalidate();
+      queryClient.setQueryData(getGetProductsQueryKey(), (old: any[] | undefined) => {
+        if (!old) return old;
+        return reordered.map((p, i) => ({ ...old.find((x: any) => x.id === p.id) ?? p, sortOrder: i }));
+      });
     } catch (err) {
       console.error("Sort fetch error:", err);
     } finally {
