@@ -81,7 +81,7 @@ export function OrderConfirmation() {
       {/* Message */}
       <h1 className="text-2xl md:text-3xl font-bold tracking-tighter mb-3 leading-tight">
         Un paso más, <span className="text-primary">{order.firstName}</span>.<br />
-        Tu orden <span className="text-primary">#{order.id}</span> fue procesada.
+        Tu orden <span className="text-primary">#{order.displayNumber ?? order.id}</span> fue procesada.
       </h1>
       <p className="text-muted-foreground font-mono text-sm mb-8">
         Te enviamos un mail a <strong className="text-foreground">{order.email}</strong> con el link a esta página.

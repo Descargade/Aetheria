@@ -69,7 +69,7 @@ export function AdminOrders() {
                   className="grid grid-cols-2 md:grid-cols-[80px_1fr_1fr_140px_140px_120px] gap-4 px-4 py-4 border-b border-border last:border-0 cursor-pointer hover:bg-muted/10 transition-colors items-center"
                   onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
                 >
-                  <span className="font-mono font-bold text-sm">#{order.id}</span>
+                  <span className="font-mono font-bold text-sm">#{order.displayNumber ?? order.id}</span>
                   <span className="font-mono text-sm font-medium">{order.firstName} {order.lastName}</span>
                   <span className="font-mono text-sm text-muted-foreground truncate hidden md:block">{order.email}</span>
                   <span className="font-mono font-bold text-sm">${Number(order.total).toLocaleString("es-AR")}</span>

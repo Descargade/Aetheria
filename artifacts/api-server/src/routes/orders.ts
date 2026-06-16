@@ -6,6 +6,15 @@ import { sendOrderNotification, sendOrderConfirmationToCustomer, sendOrderConfir
 
 const router = Router();
 
+let displayNumberEnsured = false;
+async function ensureDisplayNumberColumn() {
+  if (displayNumberEnsured) return;
+  try {
+    await db.execute(sql`ALTER TABLE orders ADD COLUMN IF NOT EXISTS display_number INTEGER`);
+    displayNumberEnsured = true;
+  } catch {}
+}
+
 function buildOrder(order: typeof ordersTable.$inferSelect, items: typeof orderItemsTable.$inferSelect[], paymentName?: string | null, shippingName?: string | null) {
   return {
     ...order,
@@ -21,6 +30,7 @@ function buildOrder(order: typeof ordersTable.$inferSelect, items: typeof orderI
 }
 
 router.get("/", async (req, res) => {
+  await ensureDisplayNumberColumn();
   const { status, search } = req.query;
   const rows = await db.select().from(ordersTable).orderBy(desc(ordersTable.createdAt));
   let filtered = rows;
@@ -120,8 +130,13 @@ router.post("/", async (req, res) => {
 
   const total = Math.max(0, subtotal - discount - paymentDiscount + shippingCost);
 
+  await ensureDisplayNumberColumn();
+  const [maxRow] = await db.select({ max: sql<number>`COALESCE(MAX(${ordersTable.displayNumber}), 0)` }).from(ordersTable);
+  const nextDisplayNumber = (maxRow?.max ?? 0) + 1;
+
   const [order] = await db.insert(ordersTable).values({
     status: "pendiente",
+    displayNumber: nextDisplayNumber,
     firstName, lastName, email, phone, address, city, province, postalCode,
     subtotal: String(subtotal),
     discount: String(discount + paymentDiscount),
@@ -170,6 +185,7 @@ router.post("/", async (req, res) => {
   const [sm] = shippingMethodId ? await db.select().from(shippingMethodsTable).where(eq(shippingMethodsTable.id, shippingMethodId)) : [null];
   sendOrderNotification({
     id: order.id,
+    displayNumber: nextDisplayNumber,
     firstName: order.firstName,
     lastName: order.lastName,
     email: order.email,
@@ -194,6 +210,7 @@ router.post("/", async (req, res) => {
   });
   sendOrderConfirmationToCustomer({
     id: order.id,
+    displayNumber: nextDisplayNumber,
     firstName: order.firstName,
     lastName: order.lastName,
     email: order.email,
@@ -227,6 +244,7 @@ router.patch("/:id", async (req, res) => {
   if (req.body.status === "confirmado") {
     sendOrderConfirmedToCustomer({
       id: order.id,
+      displayNumber: order.displayNumber,
       firstName: order.firstName,
       lastName: order.lastName,
       email: order.email,
@@ -239,6 +257,7 @@ router.patch("/:id", async (req, res) => {
   if (req.body.status === "enviado") {
     sendOrderShippedToCustomer({
       id: order.id,
+      displayNumber: order.displayNumber,
       firstName: order.firstName,
       lastName: order.lastName,
       email: order.email,

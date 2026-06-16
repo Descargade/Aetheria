@@ -42,6 +42,7 @@ function baseHtml(content: string) {
 
 export async function sendOrderNotification(order: {
   id: number;
+  displayNumber?: number | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -61,10 +62,11 @@ export async function sendOrderNotification(order: {
   const resend = getResend();
   if (!resend) return;
 
+  const orderNum = order.displayNumber ?? order.id;
   const itemsHtmlStr = itemsHtml(order.items);
 
   const html = baseHtml(`
-    <p style="font-size:16px;color:#333;margin:0 0 4px">¡Nuevo pedido <strong>#${order.id}</strong>!</p>
+    <p style="font-size:16px;color:#333;margin:0 0 4px">¡Nuevo pedido <strong>#${orderNum}</strong>!</p>
     <p style="font-size:14px;color:#666;margin:0 0 24px">Recibido el ${new Date().toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px">
@@ -103,10 +105,10 @@ export async function sendOrderNotification(order: {
     await resend.emails.send({
       from: FROM,
       to: ADMIN_EMAIL,
-      subject: `Nuevo pedido #${order.id} — AETHERIA`,
+      subject: `Nuevo pedido #${orderNum} — AETHERIA`,
       html,
     });
-    console.log(`Admin notification sent for order #${order.id}`);
+    console.log(`Admin notification sent for order #${orderNum}`);
   } catch (err) {
     console.error("Failed to send admin notification:", err);
   }
@@ -114,6 +116,7 @@ export async function sendOrderNotification(order: {
 
 export async function sendOrderConfirmationToCustomer(order: {
   id: number;
+  displayNumber?: number | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -124,9 +127,11 @@ export async function sendOrderConfirmationToCustomer(order: {
   const resend = getResend();
   if (!resend) return;
 
+  const orderNum = order.displayNumber ?? order.id;
+
   const html = baseHtml(`
     <p style="font-size:16px;color:#333;margin:0 0 4px">¡Hola ${order.firstName}! 🎉</p>
-    <p style="font-size:14px;color:#666;margin:0 0 24px">Tu pedido <strong>#${order.id}</strong> fue procesado correctamente.</p>
+    <p style="font-size:14px;color:#666;margin:0 0 24px">Tu pedido <strong>#${orderNum}</strong> fue procesado correctamente.</p>
 
     <div style="background:#f8f8f8;padding:20px;margin-bottom:24px;border-left:3px solid #e91e63">
       <p style="font-size:13px;color:#333;margin:0 0 8px"><strong>DATOS PARA TRANSFERENCIA</strong></p>
@@ -149,10 +154,10 @@ export async function sendOrderConfirmationToCustomer(order: {
     await resend.emails.send({
       from: FROM,
       to: order.email,
-      subject: `Pedido #${order.id} recibido — AETHERIA`,
+      subject: `Pedido #${orderNum} recibido — AETHERIA`,
       html,
     });
-    console.log(`Confirmation sent to customer #${order.id}`);
+    console.log(`Confirmation sent to customer #${orderNum}`);
   } catch (err) {
     console.error("Failed to send customer confirmation:", err);
   }
@@ -160,6 +165,7 @@ export async function sendOrderConfirmationToCustomer(order: {
 
 export async function sendOrderConfirmedToCustomer(order: {
   id: number;
+  displayNumber?: number | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -169,9 +175,11 @@ export async function sendOrderConfirmedToCustomer(order: {
   const resend = getResend();
   if (!resend) return;
 
+  const orderNum = order.displayNumber ?? order.id;
+
   const html = baseHtml(`
     <p style="font-size:16px;color:#333;margin:0 0 4px">¡Hola ${order.firstName}! ✅</p>
-    <p style="font-size:14px;color:#666;margin:0 0 24px">Tu pedido <strong>#${order.id}</strong> ha sido <strong style="color:#2e7d32">confirmado</strong>.</p>
+    <p style="font-size:14px;color:#666;margin:0 0 24px">Tu pedido <strong>#${orderNum}</strong> ha sido <strong style="color:#2e7d32">confirmado</strong>.</p>
 
     <p style="font-size:14px;color:#333;margin-bottom:24px">Estamos preparando tu pedido para el envío. Te avisaremos cuando esté en camino.</p>
 
@@ -190,10 +198,10 @@ export async function sendOrderConfirmedToCustomer(order: {
     await resend.emails.send({
       from: FROM,
       to: order.email,
-      subject: `Pedido #${order.id} confirmado — AETHERIA ✅`,
+      subject: `Pedido #${orderNum} confirmado — AETHERIA ✅`,
       html,
     });
-    console.log(`Order confirmed email sent to customer #${order.id}`);
+    console.log(`Order confirmed email sent to customer #${orderNum}`);
   } catch (err) {
     console.error("Failed to send order confirmed email:", err);
   }
@@ -201,6 +209,7 @@ export async function sendOrderConfirmedToCustomer(order: {
 
 export async function sendOrderShippedToCustomer(order: {
   id: number;
+  displayNumber?: number | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -210,9 +219,11 @@ export async function sendOrderShippedToCustomer(order: {
   const resend = getResend();
   if (!resend) return;
 
+  const orderNum = order.displayNumber ?? order.id;
+
   const html = baseHtml(`
     <p style="font-size:16px;color:#333;margin:0 0 4px">¡Hola ${order.firstName}! 🚚</p>
-    <p style="font-size:14px;color:#666;margin:0 0 24px">Tu pedido <strong>#${order.id}</strong> ya fue <strong style="color:#1565c0">enviado</strong>.</p>
+    <p style="font-size:14px;color:#666;margin:0 0 24px">Tu pedido <strong>#${orderNum}</strong> ya fue <strong style="color:#1565c0">enviado</strong>.</p>
 
     <p style="font-size:14px;color:#333;margin-bottom:24px">Tu compra está en camino. A continuación tenés los datos del envío:</p>
 
@@ -231,10 +242,10 @@ export async function sendOrderShippedToCustomer(order: {
     await resend.emails.send({
       from: FROM,
       to: order.email,
-      subject: `Pedido #${order.id} enviado — AETHERIA 🚚`,
+      subject: `Pedido #${orderNum} enviado — AETHERIA 🚚`,
       html,
     });
-    console.log(`Order shipped email sent to customer #${order.id}`);
+    console.log(`Order shipped email sent to customer #${orderNum}`);
   } catch (err) {
     console.error("Failed to send order shipped email:", err);
   }

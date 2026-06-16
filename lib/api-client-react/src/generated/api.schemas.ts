@@ -222,6 +222,7 @@ export interface OrderItem {
 
 export interface Order {
   id: number;
+  displayNumber?: number | null;
   status: OrderStatus;
   firstName?: string;
   lastName?: string;
