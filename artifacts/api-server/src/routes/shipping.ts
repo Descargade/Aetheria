@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { db, shippingMethodsTable, shippingProvidersTable, storePickupConfigTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { getProvider, getAllProviders } from "../shipping";
 
 const router = Router();
 
@@ -32,34 +31,19 @@ router.delete("/:id", async (req, res) => {
   res.status(204).send();
 });
 
-// ── Quote ────────────────────────────────────────────────────
-
-interface QuoteBody {
-  shippingMethodId: number;
-  postalCode: string;
-  province: string;
-  city?: string;
-  weight?: number;
-  subtotal?: number;
-}
+// ── Quote (returns static price set by admin) ────────────────
 
 router.post("/quote", async (req, res) => {
-  const { shippingMethodId, postalCode, province, city, weight, subtotal } = req.body as QuoteBody;
+  const { shippingMethodId } = req.body as { shippingMethodId: number };
 
-  if (!shippingMethodId || !postalCode || !province) {
-    return res.status(400).json({ error: "shippingMethodId, postalCode and province are required" });
+  if (!shippingMethodId) {
+    return res.status(400).json({ error: "shippingMethodId is required" });
   }
 
   const [method] = await db.select().from(shippingMethodsTable).where(eq(shippingMethodsTable.id, shippingMethodId));
   if (!method) return res.status(404).json({ error: "Shipping method not found" });
 
-  const provider = getProvider(method.provider ?? "custom");
-  if (!provider) {
-    return res.json({ price: Number(method.price), estimatedDays: method.estimatedDays ?? "", provider: "custom", methodName: method.name });
-  }
-
-  const result = await provider.quote({ shippingMethodId, postalCode, province, city, weight, subtotal }, method.config ?? undefined);
-  res.json(result);
+  res.json({ price: Number(method.price), estimatedDays: method.estimatedDays ?? "", methodName: method.name });
 });
 
 // ── Shipping Providers (admin) ───────────────────────────────
@@ -86,7 +70,7 @@ router.delete("/providers/:id", async (req, res) => {
 });
 
 router.get("/providers/available", (_req, res) => {
-  res.json(getAllProviders().map((p) => ({ code: p.code, name: p.name })));
+  res.json([]);
 });
 
 // ── Store Pickup Config (admin) ──────────────────────────────

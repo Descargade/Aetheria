@@ -2,7 +2,6 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { ordersTable, orderItemsTable, cartItemsTable, productsTable, shippingMethodsTable, paymentMethodsTable, couponsTable, variantsTable, variantSizesTable } from "@workspace/db";
 import { eq, desc, sql, and } from "drizzle-orm";
-import { getProvider } from "../shipping";
 import { sendOrderNotification, sendOrderConfirmationToCustomer } from "../mail";
 
 const router = Router();
@@ -49,6 +48,10 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const { sessionId, firstName, lastName, email, phone, address, city, province, postalCode, paymentMethodId, shippingMethodId, couponCode, notes } = req.body;
 
+  if (!sessionId || !firstName || !lastName || !email || !phone || !address || !city || !province || !postalCode || !paymentMethodId || !shippingMethodId) {
+    return res.status(400).json({ error: "Faltan campos obligatorios: nombre, apellido, email, teléfono, dirección, ciudad, provincia, código postal, método de pago y método de envío son requeridos" });
+  }
+
   const cartItems = await db.select({ item: cartItemsTable, product: productsTable }).from(cartItemsTable).leftJoin(productsTable, eq(cartItemsTable.productId, productsTable.id)).where(eq(cartItemsTable.sessionId, sessionId));
   if (cartItems.length === 0) return res.status(400).json({ error: "Cart is empty" });
 
@@ -82,11 +85,22 @@ router.post("/", async (req, res) => {
 
   if (couponCode) {
     const [coupon] = await db.select().from(couponsTable).where(eq(couponsTable.code, couponCode));
+    const now = new Date();
+
     if (coupon && coupon.active) {
-      discount = coupon.discountType === "percentage"
-        ? subtotal * (Number(coupon.discountValue) / 100)
-        : Number(coupon.discountValue);
-      await db.update(couponsTable).set({ usageCount: coupon.usageCount + 1 }).where(eq(couponsTable.id, coupon.id));
+      let valid = true;
+
+      if (coupon.startDate && now < new Date(coupon.startDate)) valid = false;
+      if (coupon.endDate && now > new Date(coupon.endDate)) valid = false;
+      if (coupon.usageLimit != null && coupon.usageCount >= coupon.usageLimit) valid = false;
+      if (coupon.minPurchase != null && subtotal < Number(coupon.minPurchase)) valid = false;
+
+      if (valid) {
+        discount = coupon.discountType === "percentage"
+          ? subtotal * (Number(coupon.discountValue) / 100)
+          : Number(coupon.discountValue);
+        await db.update(couponsTable).set({ usageCount: coupon.usageCount + 1 }).where(eq(couponsTable.id, coupon.id));
+      }
     }
   }
 
@@ -94,20 +108,7 @@ router.post("/", async (req, res) => {
   if (shippingMethodId) {
     const [sm] = await db.select().from(shippingMethodsTable).where(eq(shippingMethodsTable.id, shippingMethodId));
     if (sm) {
-      const provider = getProvider(sm.provider ?? "custom");
-      if (provider && postalCode) {
-        const weight = cartItems.reduce((s, r) => s + r.item.quantity, 0);
-        const quote = await provider.quote({
-          shippingMethodId: sm.id,
-          postalCode,
-          province: province ?? "",
-          weight,
-          subtotal,
-        }, sm.config ?? undefined);
-        shippingCost = quote.price;
-      } else {
-        shippingCost = Number(sm.price);
-      }
+      shippingCost = Number(sm.price);
     }
   }
 

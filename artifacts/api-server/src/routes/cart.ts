@@ -2,7 +2,6 @@ import { Router } from "express";
 import { db, shippingMethodsTable } from "@workspace/db";
 import { cartItemsTable, productsTable, couponsTable, categoriesTable, variantsTable, variantSizesTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
-import { getProvider } from "../shipping";
 
 const router = Router();
 
@@ -61,22 +60,10 @@ async function buildCart(sessionId: string, couponCode?: string | null, shipping
   }
 
   let shippingCost = 0;
-  if (shipping?.shippingMethodId && shipping?.postalCode && shipping?.province) {
+  if (shipping?.shippingMethodId) {
     const [method] = await db.select().from(shippingMethodsTable).where(eq(shippingMethodsTable.id, shipping.shippingMethodId));
     if (method) {
-      const provider = getProvider(method.provider ?? "custom");
-      if (provider) {
-        const quote = await provider.quote({
-          shippingMethodId: method.id,
-          postalCode: shipping.postalCode,
-          province: shipping.province,
-          weight: cartItems.reduce((sum, i) => sum + i.quantity, 0),
-          subtotal,
-        }, method.config ?? undefined);
-        shippingCost = quote.price;
-      } else {
-        shippingCost = Number(method.price);
-      }
+      shippingCost = Number(method.price);
     }
   }
 
@@ -95,6 +82,21 @@ router.post("/", async (req, res) => {
   const { sessionId, productId, quantity, selectedSize, selectedColor } = req.body;
   const [product] = await db.select().from(productsTable).where(eq(productsTable.id, productId));
   if (!product) return res.status(404).json({ error: "Product not found" });
+
+  const productVariants = await db.select().from(variantsTable).where(and(eq(variantsTable.productId, productId), eq(variantsTable.active, true)));
+  if (productVariants.length > 0) {
+    if (!selectedColor) {
+      return res.status(400).json({ error: "Debés seleccionar un color" });
+    }
+    const colorVariant = productVariants.find(v => v.colorName === selectedColor);
+    if (!colorVariant) {
+      return res.status(400).json({ error: "Color no válido" });
+    }
+    const variantSizes = await db.select().from(variantSizesTable).where(and(eq(variantSizesTable.variantId, colorVariant.id), eq(variantSizesTable.active, true)));
+    if (variantSizes.length > 0 && !selectedSize) {
+      return res.status(400).json({ error: "Debés seleccionar un talle" });
+    }
+  }
 
   const availableStock = await getAvailableStock(productId, selectedColor, selectedSize);
   if (availableStock <= 0) {
@@ -169,6 +171,34 @@ router.post("/apply-coupon", async (req, res) => {
   if (!coupon || !coupon.active) {
     return res.json({ valid: false, coupon: null, message: "Cupón inválido o expirado" });
   }
+
+  if (coupon.startDate) {
+    const now = new Date();
+    const start = new Date(coupon.startDate);
+    if (now < start) {
+      return res.json({ valid: false, coupon: null, message: "Este cupón aún no está disponible" });
+    }
+  }
+
+  if (coupon.endDate) {
+    const now = new Date();
+    const end = new Date(coupon.endDate);
+    if (now > end) {
+      return res.json({ valid: false, coupon: null, message: "Este cupón expiró" });
+    }
+  }
+
+  if (coupon.usageLimit != null && coupon.usageCount >= coupon.usageLimit) {
+    return res.json({ valid: false, coupon: null, message: "Este cupón ya alcanzó su límite de uso" });
+  }
+
+  const cartItems = await db.select().from(cartItemsTable).where(eq(cartItemsTable.sessionId, sessionId));
+  const subtotal = cartItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
+
+  if (coupon.minPurchase != null && subtotal < Number(coupon.minPurchase)) {
+    return res.json({ valid: false, coupon: null, message: `El mínimo para este cupón es $${Number(coupon.minPurchase).toLocaleString("es-AR")}` });
+  }
+
   res.json({ valid: true, coupon: { ...coupon, discountValue: Number(coupon.discountValue), minPurchase: coupon.minPurchase != null ? Number(coupon.minPurchase) : null }, message: "Cupón aplicado" });
 });
 

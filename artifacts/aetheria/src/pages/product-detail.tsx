@@ -135,8 +135,12 @@ export function ProductDetail() {
   };
 
   const handleAddToCart = () => {
+    if (activeVariants.length > 0 && !currentVariant) {
+      toast({ title: "Seleccioná un color", variant: "destructive" });
+      return;
+    }
     if (availableSizes.length > 0 && !selectedSize) {
-      toast({ title: "Selecciona un talle", variant: "destructive" });
+      toast({ title: "Seleccioná un talle", variant: "destructive" });
       return;
     }
     addToCart.mutate({

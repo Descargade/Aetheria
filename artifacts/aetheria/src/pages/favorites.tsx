@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "@/hooks/use-session";
 import { Button } from "@/components/ui/button";
 import { Heart, Trash2, ShoppingBag } from "lucide-react";
-import { useAddToCart, getGetCartQueryKey } from "@workspace/api-client-react";
 import { PriceDisplay } from "@/components/ui/price-display";
 
 export function Favorites() {
@@ -13,17 +12,10 @@ export function Favorites() {
 
   const { data: favorites, isLoading } = useGetFavorites({ sessionId }, { query: { enabled: !!sessionId, queryKey: getGetFavoritesQueryKey({ sessionId }) } });
   const removeFavorite = useRemoveFavorite();
-  const addToCart = useAddToCart();
 
   const handleRemove = (id: number) => {
     removeFavorite.mutate({ id }, {
       onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetFavoritesQueryKey({ sessionId }) })
-    });
-  };
-
-  const handleAddToCart = (productId: number, price: number) => {
-    addToCart.mutate({ data: { sessionId, productId, quantity: 1 } }, {
-      onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetCartQueryKey({ sessionId }) })
     });
   };
 
@@ -89,11 +81,12 @@ export function Favorites() {
                 </Link>
                 <PriceDisplay price={product.price} salePrice={product.salePrice} size="sm" />
                 <div className="flex gap-2 mt-3">
-                  <Button onClick={() => handleAddToCart(product.id, product.salePrice ? Number(product.salePrice) : Number(product.price))}
-                    className="flex-1 h-10 rounded-none font-mono uppercase text-xs tracking-widest bg-primary text-white hover:bg-primary/80 border-none"
-                    data-testid={`button-add-to-cart-${product.id}`}>
-                    <ShoppingBag className="h-3 w-3 mr-2" />Al carrito
-                  </Button>
+                  <Link href={`/producto/${product.id}`} className="flex-1">
+                    <Button className="w-full h-10 rounded-none font-mono uppercase text-xs tracking-widest bg-primary text-white hover:bg-primary/80 border-none"
+                      data-testid={`button-add-to-cart-${product.id}`}>
+                      <ShoppingBag className="h-3 w-3 mr-2" />Ver producto
+                    </Button>
+                  </Link>
                   <Button variant="outline" size="icon" onClick={() => handleRemove(fav.id)}
                     className="h-10 w-10 rounded-none border-border hover:border-destructive hover:text-destructive"
                     data-testid={`button-remove-favorite-${fav.id}`}>

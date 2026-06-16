@@ -64,11 +64,8 @@ export function Checkout() {
     defaultValues: { email: "", firstName: "", lastName: "", phone: "", address: "", addressNumber: "", floor: "", city: "", province: "", postalCode: "" },
   });
 
-  const postalCode = form.watch("postalCode");
-  const province = form.watch("province");
-
   useEffect(() => {
-    if (!selectedShipping || !postalCode || !province) {
+    if (!selectedShipping) {
       setQuote(null);
       return;
     }
@@ -81,7 +78,7 @@ export function Checkout() {
     fetch("/api/shipping/quote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ shippingMethodId: selectedShipping, postalCode, province, subtotal: cart?.subtotal ?? 0 }),
+      body: JSON.stringify({ shippingMethodId: selectedShipping }),
     })
       .then((r) => r.json())
       .then((data) => {
@@ -90,7 +87,7 @@ export function Checkout() {
       .catch(() => { if (!cancelled) setQuoteLoading(false); });
 
     return () => { cancelled = true; };
-  }, [selectedShipping, postalCode, province, shippingMethods, cart?.subtotal]);
+  }, [selectedShipping, shippingMethods]);
 
   const activeShipping = shippingMethods?.find((s) => s.id === selectedShipping);
   const activePayment = paymentMethods?.find((p) => p.id === selectedPayment);
