@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, Tag, ShoppingBag, Settings, LogOut, Ruler } from "lucide-react";
+import { LayoutDashboard, Package, Tag, ShoppingBag, Settings, LogOut, Ruler, Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -52,7 +53,39 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-sidebar border-b border-sidebar-border flex items-center justify-between px-4">
-        <span className="font-bold tracking-tighter uppercase text-sidebar-foreground">AETHERIA Admin</span>
+        <div className="flex items-center gap-3">
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="text-sidebar-foreground/60 hover:text-sidebar-foreground">
+                <Menu className="h-5 w-5" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64 bg-sidebar border-r border-sidebar-border p-0">
+              <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
+                <span className="font-bold tracking-tighter uppercase text-sidebar-foreground text-lg">AETHERIA</span>
+              </div>
+              <nav className="flex-1 py-4 px-3">
+                {NAV.map(({ href, label, icon: Icon }) => {
+                  const active = location === href || location.startsWith(href + "/");
+                  return (
+                    <Link key={href} href={href}>
+                      <div className={`flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-mono uppercase tracking-wider transition-colors cursor-pointer ${active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"}`}>
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span>{label}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </nav>
+              <div className="p-3 border-t border-sidebar-border">
+                <button onClick={handleLogout} className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-mono uppercase tracking-wider text-sidebar-foreground/60 hover:text-destructive transition-colors">
+                  <LogOut className="h-4 w-4" /><span>Salir</span>
+                </button>
+              </div>
+            </SheetContent>
+          </Sheet>
+          <span className="font-bold tracking-tighter uppercase text-sidebar-foreground">AETHERIA</span>
+        </div>
         <button onClick={handleLogout} className="text-sidebar-foreground/60 hover:text-destructive">
           <LogOut className="h-5 w-5" />
         </button>

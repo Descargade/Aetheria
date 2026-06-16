@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 
 // Layouts
@@ -15,6 +16,7 @@ import { Shop } from "@/pages/shop";
 import { ProductDetail } from "@/pages/product-detail";
 import { Cart } from "@/pages/cart";
 import { Checkout } from "@/pages/checkout";
+import { OrderConfirmation } from "@/pages/order-confirmation";
 import { Favorites } from "@/pages/favorites";
 import { Contact } from "@/pages/contact";
 
@@ -64,6 +66,9 @@ function Router() {
       </Route>
       <Route path="/checkout">
         <MainLayout><Checkout /></MainLayout>
+      </Route>
+      <Route path="/pedido-confirmado/:orderId">
+        <MainLayout><OrderConfirmation /></MainLayout>
       </Route>
       <Route path="/favoritos">
         <MainLayout><Favorites /></MainLayout>
@@ -138,18 +143,18 @@ const baseUrl = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark" storageKey="aetheria-theme">
-        <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="dark" storageKey="aetheria-theme">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
           <TooltipProvider>
-            <WouterRouter base={baseUrl}>
+            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
               <Router />
             </WouterRouter>
             <Toaster />
           </TooltipProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

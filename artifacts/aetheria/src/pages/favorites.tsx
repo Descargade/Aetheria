@@ -5,6 +5,7 @@ import { useSession } from "@/hooks/use-session";
 import { Button } from "@/components/ui/button";
 import { Heart, Trash2, ShoppingBag } from "lucide-react";
 import { useAddToCart, getGetCartQueryKey } from "@workspace/api-client-react";
+import { PriceDisplay } from "@/components/ui/price-display";
 
 export function Favorites() {
   const { sessionId } = useSession();
@@ -71,30 +72,23 @@ export function Favorites() {
                       <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">AETHERIA</span>
                     </div>
                   )}
-                  {product.salePrice && (
-                    <div className="absolute top-3 left-3 bg-primary text-white text-xs font-mono px-2 py-1 uppercase tracking-widest">OFERTA</div>
-                  )}
-                  {product.isNew && !product.salePrice && (
-                    <div className="absolute top-3 left-3 bg-foreground text-background text-xs font-mono px-2 py-1 uppercase tracking-widest">NUEVO</div>
-                  )}
+                  <div className="absolute bottom-3 left-3 flex flex-col gap-1.5">
+                    {product.salePrice && (
+                      <span className="bg-primary/90 text-white text-[10px] font-mono px-2 py-0.5 uppercase tracking-widest backdrop-blur-sm">OFERTA</span>
+                    )}
+                    {product.isNew && (
+                      <span className="bg-foreground/90 text-background text-[10px] font-mono px-2 py-0.5 uppercase tracking-widest backdrop-blur-sm">NUEVO</span>
+                    )}
+                  </div>
                 </div>
               </Link>
               <div className="p-4 flex flex-col flex-1">
                 <Link href={`/producto/${product.id}`}>
-                  <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-1">{product.categoryName}</p>
-                  <h3 className="font-bold uppercase tracking-wide text-sm leading-tight hover:text-primary transition-colors mb-3">{product.name}</h3>
+                  <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-0.5">{product.categoryName}</p>
+                  <h3 className="font-bold uppercase tracking-wide text-sm leading-tight hover:text-primary transition-colors mb-2">{product.name}</h3>
                 </Link>
-                <div className="flex items-center gap-2 mb-4">
-                  {product.salePrice ? (
-                    <>
-                      <span className="font-bold font-mono text-primary">${Number(product.salePrice).toLocaleString("es-AR")}</span>
-                      <span className="text-xs font-mono text-muted-foreground line-through">${Number(product.price).toLocaleString("es-AR")}</span>
-                    </>
-                  ) : (
-                    <span className="font-bold font-mono">${Number(product.price).toLocaleString("es-AR")}</span>
-                  )}
-                </div>
-                <div className="flex gap-2 mt-auto">
+                <PriceDisplay price={product.price} salePrice={product.salePrice} size="sm" />
+                <div className="flex gap-2 mt-3">
                   <Button onClick={() => handleAddToCart(product.id, product.salePrice ? Number(product.salePrice) : Number(product.price))}
                     className="flex-1 h-10 rounded-none font-mono uppercase text-xs tracking-widest bg-primary text-white hover:bg-primary/80 border-none"
                     data-testid={`button-add-to-cart-${product.id}`}>

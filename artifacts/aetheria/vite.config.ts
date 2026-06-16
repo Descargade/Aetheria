@@ -14,7 +14,7 @@ if (Number.isNaN(port) || port <= 0) {
 const basePath = process.env.BASE_PATH || "/";
 
 export default defineConfig({
-  base: basePath,
+  base: process.env.BASE_PATH || "/",
   plugins: [
     react(),
     tailwindcss(),
@@ -46,8 +46,8 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-    port,
-    strictPort: true,
+    port: Number(process.env.PORT) || 5173,
+    strictPort: false,
     host: "0.0.0.0",
     allowedHosts: true,
     fs: {
@@ -61,7 +61,7 @@ export default defineConfig({
     },
   },
   preview: {
-    port,
+    port: Number(process.env.PORT) || 5173,
     host: "0.0.0.0",
     allowedHosts: true,
   },

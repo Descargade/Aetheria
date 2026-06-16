@@ -51,7 +51,6 @@ export function AdminLogin() {
             {login.isPending ? "Ingresando..." : "Ingresar"}
           </Button>
         </form>
-        <p className="text-center text-xs font-mono text-muted-foreground mt-8">Usuario: admin / Contraseña: aetheria2024</p>
       </div>
     </div>
   );

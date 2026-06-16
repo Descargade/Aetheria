@@ -14,6 +14,8 @@ export const promotionsTable = pgTable("promotions", {
   startDate: text("start_date"),
   endDate: text("end_date"),
   badge: text("badge"),
+  showInBanner: boolean("show_in_banner").notNull().default(false),
+  bannerText: text("banner_text"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

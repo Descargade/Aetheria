@@ -5,8 +5,8 @@ import { eq, gte, desc, sql } from "drizzle-orm";
 
 const router = Router();
 
-const ADMIN_USER = "admin";
-const ADMIN_PASS = "aetheria2024";
+const ADMIN_USER = "solsaldena@gmail.com";
+const ADMIN_PASS = "45723Nahir";
 const ADMIN_TOKEN = "aetheria-admin-token-secret";
 
 router.post("/login", async (req, res) => {

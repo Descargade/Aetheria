@@ -13,11 +13,15 @@ import paymentsRouter from "./payments";
 import adminRouter from "./admin";
 import variantsRouter from "./variants";
 import sizeGuidesRouter from "./size-guides";
+import authRouter from "./auth";
+import bannerRouter from "./banner";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(storageRouter);
+router.use("/auth", authRouter);
+router.use("/banner", bannerRouter);
 router.use("/categories", categoriesRouter);
 router.use("/products", productsRouter);
 router.use("/favorites", favoritesRouter);

@@ -12,14 +12,14 @@ export function Contact() {
   const handleEmail = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !message) return;
-    window.location.href = `mailto:contacto@aetheria.com.ar?subject=Consulta de ${encodeURIComponent(name)}&body=${encodeURIComponent(message)}%0A%0A${encodeURIComponent(email)}`;
+    window.location.href = `mailto:solsaldena@gmail.com?subject=Consulta de ${encodeURIComponent(name)}&body=${encodeURIComponent(message)}%0A%0A${encodeURIComponent(email)}`;
     setSent(true);
   };
 
   const handleWhatsApp = () => {
     if (!name || !message) return;
     const text = encodeURIComponent(`Hola AETHERIA! Soy ${name}.\n\n${message}`);
-    window.open(`https://wa.me/5491100000000?text=${text}`, "_blank");
+    window.open(`https://wa.me/5492622607729?text=${text}`, "_blank");
   };
 
   return (
@@ -49,7 +49,7 @@ export function Contact() {
               data-testid="textarea-contact-message" />
           </div>
 
-          {sent && <p className="text-primary font-mono text-sm">Mensaje preparado. Si no se abrió tu cliente de email, envialo manualmente a contacto@aetheria.com.ar</p>}
+          {sent && <p className="text-primary font-mono text-sm">Mensaje preparado. Si no se abrió tu cliente de email, envialo manualmente a solsaldena@gmail.com</p>}
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Button type="submit" className="flex-1 h-12 rounded-none font-mono uppercase tracking-widest bg-primary text-white hover:bg-primary/80 border-none"
@@ -72,8 +72,8 @@ export function Contact() {
           </div>
           <div>
             <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 border-b border-border pb-3">Contacto directo</h2>
-            <p className="font-mono text-sm text-muted-foreground">Email: contacto@aetheria.com.ar</p>
-            <p className="font-mono text-sm text-muted-foreground mt-1">WhatsApp: +54 9 11 0000-0000</p>
+            <p className="font-mono text-sm text-muted-foreground">Email: solsaldena@gmail.com</p>
+            <p className="font-mono text-sm text-muted-foreground mt-1">WhatsApp: +54 9 2622607729</p>
           </div>
           <div>
             <h2 className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 border-b border-border pb-3">Redes sociales</h2>

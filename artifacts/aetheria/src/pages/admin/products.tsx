@@ -44,7 +44,7 @@ export function AdminProducts() {
       description: p.description ?? "", categoryId: p.categoryId,
       price: String(p.price), salePrice: p.salePrice ? String(p.salePrice) : "",
       stock: p.stock ?? 0, featured: p.featured, isNew: p.isNew, active: p.active,
-      image: p.image ?? "",
+      image: p.images?.[0] ?? "",
     });
     setEditId(p.id); setShowForm(true);
   };
@@ -57,7 +57,7 @@ export function AdminProducts() {
       price: form.price,
       salePrice: form.salePrice || undefined,
       stock: Number(form.stock),
-      image: form.image || undefined,
+      images: form.image ? [form.image] : undefined,
     };
     if (editId) {
       updateProduct.mutate({ id: editId, data: payload as any }, { onSuccess: () => { invalidate(); setShowForm(false); } });

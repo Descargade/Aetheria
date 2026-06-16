@@ -14,6 +14,7 @@ import { useSession } from "@/hooks/use-session";
 import { useToast } from "@/hooks/use-toast";
 import { Heart, ChevronRight, ShoppingBag, Ruler } from "lucide-react";
 import { objectUrl } from "@/lib/storage-utils";
+import { PriceDisplay } from "@/components/ui/price-display";
 
 function SizeGuideModal({ onClose, categoryId }: { onClose: () => void; categoryId?: number }) {
   const { data: sizeGuides } = useGetSizeGuides();
@@ -201,29 +202,7 @@ export function ProductDetail() {
             <div className="mb-8">
               <p className="text-primary font-mono text-sm uppercase tracking-widest mb-2">{product.categoryName}</p>
               <h1 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase mb-4">{product.name}</h1>
-              <div className="space-y-2">
-                <div className="flex items-center gap-4 text-2xl font-mono">
-                  {product.salePrice ? (
-                    <>
-                      <span className="text-destructive font-bold">${Number(product.salePrice).toLocaleString("es-AR")}</span>
-                      <span className="text-muted-foreground line-through font-bold text-lg">${Number(product.price).toLocaleString("es-AR")}</span>
-                    </>
-                  ) : (
-                    <span className="font-bold">${Number(product.price).toLocaleString("es-AR")}</span>
-                  )}
-                </div>
-                {(() => {
-                  const effPrice = Number(product.salePrice || product.price);
-                  const discPrice = calcDiscounted(effPrice);
-                  return (
-                    <div className="flex items-center gap-2 text-sm font-mono text-muted-foreground">
-                      <span>Transf. <span className="text-primary font-semibold">${discPrice.toLocaleString("es-AR")}</span></span>
-                      <span className="text-muted-foreground/40">/</span>
-                      <span>Efect. <span className="font-semibold text-foreground">${effPrice.toLocaleString("es-AR")}</span></span>
-                    </div>
-                  );
-                })()}
-              </div>
+              <PriceDisplay price={product.price} salePrice={product.salePrice} size="lg" />
             </div>
 
             <div className="h-px bg-border w-full mb-8" />

@@ -109,11 +109,10 @@ export function SearchBar() {
                       <p className="font-mono font-bold text-xs uppercase truncate text-foreground">{p.name}</p>
                       <p className="font-mono text-xs text-muted-foreground truncate">{p.categoryName}</p>
                     </div>
-                    <div className="text-right shrink-0">
-                      {p.salePrice ? (
-                        <p className="font-mono font-bold text-xs text-destructive">${Number(p.salePrice).toLocaleString("es-AR")}</p>
-                      ) : (
-                        <p className="font-mono font-bold text-xs text-foreground">${Number(p.price).toLocaleString("es-AR")}</p>
+                    <div className="text-right shrink-0 font-mono">
+                      <p className="font-bold text-xs text-destructive">${Number(p.salePrice ?? p.price).toLocaleString("es-AR")}</p>
+                      {p.salePrice && (
+                        <p className="text-[10px] text-muted-foreground line-through">${Number(p.price).toLocaleString("es-AR")}</p>
                       )}
                     </div>
                   </Link>

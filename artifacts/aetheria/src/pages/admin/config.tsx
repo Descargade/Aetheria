@@ -1,16 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGetShippingMethods, useGetPaymentMethods, useCreateShippingMethod, useUpdateShippingMethod, useDeleteShippingMethod, useCreatePaymentMethod, useUpdatePaymentMethod, useDeletePaymentMethod, useBulkPriceUpdate, getGetShippingMethodsQueryKey, getGetPaymentMethodsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, Store } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+interface ShippingProvider {
+  id: number | null;
+  code: string;
+  name: string;
+  description: string;
+  active: boolean;
+  config: Record<string, unknown>;
+}
+
+interface AvailableProvider {
+  code: string;
+  name: string;
+}
+
+interface PickupConfig {
+  id: number | null;
+  enabled: boolean;
+  address: string;
+  city: string;
+  province: string;
+  phone: string;
+  hours: string;
+  instructions: string;
+}
 
 export function AdminConfig() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [tab, setTab] = useState<"shipping" | "payment" | "prices">("shipping");
+  const [tab, setTab] = useState<"shipping" | "payment" | "prices" | "providers">("shipping");
   const [bulkType, setBulkType] = useState("increase_percentage");
   const [bulkValue, setBulkValue] = useState("");
 
@@ -26,6 +51,49 @@ export function AdminConfig() {
 
   const [shippingEdit, setShippingEdit] = useState<any | null>(null);
   const [paymentEdit, setPaymentEdit] = useState<any | null>(null);
+  const [providerEdit, setProviderEdit] = useState<ShippingProvider | null>(null);
+  const [providers, setProviders] = useState<ShippingProvider[]>([]);
+  const [availableProviders, setAvailableProviders] = useState<AvailableProvider[]>([]);
+  const [pickupConfig, setPickupConfig] = useState<PickupConfig | null>(null);
+
+  useEffect(() => {
+    fetch("/api/shipping/providers").then((r) => r.json()).then(setProviders).catch(() => {});
+    fetch("/api/shipping/providers/available").then((r) => r.json()).then(setAvailableProviders).catch(() => {});
+    fetch("/api/shipping/pickup-config").then((r) => r.json()).then(setPickupConfig).catch(() => {});
+  }, []);
+
+  const handleSaveProvider = async (p: ShippingProvider) => {
+    const url = p.id ? `/api/shipping/providers/${p.id}` : "/api/shipping/providers";
+    const method = p.id ? "PUT" : "POST";
+    const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(p) });
+    if (res.ok) {
+      toast({ title: "Proveedor guardado" });
+      setProviderEdit(null);
+      const updated = await fetch("/api/shipping/providers").then((r) => r.json());
+      setProviders(updated);
+    }
+  };
+
+  const handleDeleteProvider = async (id: number) => {
+    if (!confirm("¿Eliminar proveedor?")) return;
+    await fetch(`/api/shipping/providers/${id}`, { method: "DELETE" });
+    toast({ title: "Proveedor eliminado" });
+    const updated = await fetch("/api/shipping/providers").then((r) => r.json());
+    setProviders(updated);
+  };
+
+  const handleSavePickup = async (cfg: PickupConfig) => {
+    const res = await fetch("/api/shipping/pickup-config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cfg),
+    });
+    if (res.ok) {
+      toast({ title: "Configuración de retiro guardada" });
+      const updated = await fetch("/api/shipping/pickup-config").then((r) => r.json());
+      setPickupConfig(updated);
+    }
+  };
 
   const handleBulkUpdate = () => {
     if (!bulkValue) return;
@@ -40,16 +108,16 @@ export function AdminConfig() {
         <h1 className="text-2xl font-bold tracking-tighter uppercase">Configuración</h1>
 
         <div className="flex border-b border-border">
-          {(["shipping","payment","prices"] as const).map((t) => (
+          {(["shipping","payment","prices","providers"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)} className={`px-6 py-3 font-mono text-xs uppercase tracking-widest border-b-2 transition-colors ${tab === t ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-              {t === "shipping" ? "Métodos de envío" : t === "payment" ? "Métodos de pago" : "Precios masivos"}
+              {t === "shipping" ? "Métodos de envío" : t === "payment" ? "Métodos de pago" : t === "prices" ? "Precios masivos" : "Proveedores"}
             </button>
           ))}
         </div>
 
         {tab === "shipping" && (
           <div className="space-y-4 max-w-2xl">
-            <Button onClick={() => setShippingEdit({ id: null, name: "", description: "", price: "", estimatedDays: "", active: true })} className="rounded-none font-mono uppercase text-xs tracking-widest bg-primary text-white hover:bg-primary/80 border-none h-10">
+            <Button onClick={() => setShippingEdit({ id: null, name: "", description: "", price: "", estimatedDays: "", active: true, provider: "custom", originZip: "" })} className="rounded-none font-mono uppercase text-xs tracking-widest bg-primary text-white hover:bg-primary/80 border-none h-10">
               <Plus className="h-4 w-4 mr-2" />Nuevo método de envío
             </Button>
             {shippingEdit && (
@@ -57,14 +125,23 @@ export function AdminConfig() {
                 <div className="flex justify-between"><h3 className="font-mono uppercase text-sm tracking-widest">Método de envío</h3><button onClick={() => setShippingEdit(null)}><X className="h-4 w-4" /></button></div>
                 <div className="grid grid-cols-2 gap-4">
                   <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Nombre *</label><Input value={shippingEdit.name} onChange={(e) => setShippingEdit({ ...shippingEdit, name: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
-                  <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Precio ($)</label><Input value={shippingEdit.price} onChange={(e) => setShippingEdit({ ...shippingEdit, price: e.target.value })} type="number" className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Precio base ($)</label><Input value={shippingEdit.price} onChange={(e) => setShippingEdit({ ...shippingEdit, price: e.target.value })} type="number" className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
                   <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Días estimados</label><Input value={shippingEdit.estimatedDays} onChange={(e) => setShippingEdit({ ...shippingEdit, estimatedDays: e.target.value })} placeholder="2-3 días hábiles" className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
-                  <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Descripción</label><Input value={shippingEdit.description} onChange={(e) => setShippingEdit({ ...shippingEdit, description: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Código postal origen</label><Input value={shippingEdit.originZip ?? ""} onChange={(e) => setShippingEdit({ ...shippingEdit, originZip: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div className="col-span-2"><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Descripción</label><Input value={shippingEdit.description} onChange={(e) => setShippingEdit({ ...shippingEdit, description: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div className="col-span-2">
+                    <label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Proveedor</label>
+                    <select value={shippingEdit.provider ?? "custom"} onChange={(e) => setShippingEdit({ ...shippingEdit, provider: e.target.value })}
+                      className="w-full h-10 font-mono text-sm bg-background border border-border px-3 text-foreground focus:outline-none">
+                      <option value="custom">— Precio fijo —</option>
+                      {availableProviders.map((ap) => <option key={ap.code} value={ap.code}>{ap.name}</option>)}
+                    </select>
+                  </div>
                 </div>
                 <label className="flex items-center gap-2 font-mono text-sm cursor-pointer"><input type="checkbox" checked={shippingEdit.active} onChange={(e) => setShippingEdit({ ...shippingEdit, active: e.target.checked })} />Activo</label>
                 <div className="flex gap-3">
                   <Button onClick={() => {
-                    const payload = { name: shippingEdit.name, description: shippingEdit.description, price: shippingEdit.price, estimatedDays: shippingEdit.estimatedDays, active: shippingEdit.active };
+                    const payload = { name: shippingEdit.name, description: shippingEdit.description, price: shippingEdit.price, estimatedDays: shippingEdit.estimatedDays, active: shippingEdit.active, provider: shippingEdit.provider, originZip: shippingEdit.originZip };
                     if (shippingEdit.id) updateShipping.mutate({ id: shippingEdit.id, data: payload as any }, { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getGetShippingMethodsQueryKey() }); setShippingEdit(null); } });
                     else createShipping.mutate({ data: payload as any }, { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getGetShippingMethodsQueryKey() }); setShippingEdit(null); } });
                   }} className="rounded-none font-mono uppercase text-xs bg-primary text-white hover:bg-primary/80 border-none h-10"><Check className="h-4 w-4 mr-2" />Guardar</Button>
@@ -75,7 +152,7 @@ export function AdminConfig() {
             <div className="border border-border">
               {shippingMethods?.map((s) => (
                 <div key={s.id} className="flex items-center justify-between px-4 py-3 border-b border-border last:border-0 gap-4">
-                  <div><p className="font-mono font-bold text-sm">{s.name}</p><p className="font-mono text-xs text-muted-foreground">${Number(s.price).toLocaleString("es-AR")} · {s.estimatedDays}</p></div>
+                  <div><p className="font-mono font-bold text-sm">{s.name}</p><p className="font-mono text-xs text-muted-foreground">${Number(s.price).toLocaleString("es-AR")} · {s.estimatedDays} · {s.provider ?? "fijo"}</p></div>
                   <div className="flex gap-2">
                     <button onClick={() => setShippingEdit({ ...s })} className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary"><Pencil className="h-3 w-3" /></button>
                     <button onClick={() => { if (confirm("¿Eliminar?")) deleteShipping.mutate({ id: s.id }, { onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetShippingMethodsQueryKey() }) }); }} className="h-8 w-8 border border-border flex items-center justify-center hover:border-destructive hover:text-destructive"><Trash2 className="h-3 w-3" /></button>
@@ -117,6 +194,63 @@ export function AdminConfig() {
                   <div className="flex gap-2">
                     <button onClick={() => setPaymentEdit({ ...p, discount: String(p.discount) })} className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary"><Pencil className="h-3 w-3" /></button>
                     <button onClick={() => { if (confirm("¿Eliminar?")) deletePayment.mutate({ id: p.id }, { onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetPaymentMethodsQueryKey() }) }); }} className="h-8 w-8 border border-border flex items-center justify-center hover:border-destructive hover:text-destructive"><Trash2 className="h-3 w-3" /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab === "providers" && (
+          <div className="space-y-4 max-w-2xl">
+            {/* Pickup Config */}
+            <div className="border border-border p-6 space-y-4">
+              <div className="flex items-center gap-2"><Store className="h-4 w-4" /><h3 className="font-mono uppercase text-sm tracking-widest">Retiro en local</h3></div>
+              {pickupConfig && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className="text-xs font-mono text-muted-foreground uppercase mb-1 block flex items-center gap-2">
+                      <input type="checkbox" checked={pickupConfig.enabled} onChange={(e) => setPickupConfig({ ...pickupConfig, enabled: e.target.checked })} />
+                      Habilitado
+                    </label>
+                  </div>
+                  <div className="col-span-2"><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Dirección</label><Input value={pickupConfig.address} onChange={(e) => setPickupConfig({ ...pickupConfig, address: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Ciudad</label><Input value={pickupConfig.city} onChange={(e) => setPickupConfig({ ...pickupConfig, city: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Provincia</label><Input value={pickupConfig.province} onChange={(e) => setPickupConfig({ ...pickupConfig, province: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Teléfono</label><Input value={pickupConfig.phone} onChange={(e) => setPickupConfig({ ...pickupConfig, phone: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Horarios</label><Input value={pickupConfig.hours} onChange={(e) => setPickupConfig({ ...pickupConfig, hours: e.target.value })} placeholder="Lun-Vie 10-18" className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div className="col-span-2"><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Instrucciones</label><Input value={pickupConfig.instructions} onChange={(e) => setPickupConfig({ ...pickupConfig, instructions: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                </div>
+              )}
+              <Button onClick={() => pickupConfig && handleSavePickup(pickupConfig)} className="rounded-none font-mono uppercase text-xs bg-primary text-white hover:bg-primary/80 border-none h-10"><Check className="h-4 w-4 mr-2" />Guardar configuración</Button>
+            </div>
+
+            <h3 className="font-mono uppercase text-sm tracking-widest pt-4">Proveedores de envío</h3>
+            <Button onClick={() => setProviderEdit({ id: null, code: "", name: "", description: "", active: true, config: {} })} className="rounded-none font-mono uppercase text-xs tracking-widest bg-primary text-white hover:bg-primary/80 border-none h-10">
+              <Plus className="h-4 w-4 mr-2" />Nuevo proveedor
+            </Button>
+            {providerEdit && (
+              <div className="border border-primary/30 bg-card p-6 space-y-4">
+                <div className="flex justify-between"><h3 className="font-mono uppercase text-sm tracking-widest">Proveedor</h3><button onClick={() => setProviderEdit(null)}><X className="h-4 w-4" /></button></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Código *</label><Input value={providerEdit.code} onChange={(e) => setProviderEdit({ ...providerEdit, code: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Nombre *</label><Input value={providerEdit.name} onChange={(e) => setProviderEdit({ ...providerEdit, name: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                  <div className="col-span-2"><label className="text-xs font-mono text-muted-foreground uppercase mb-1 block">Descripción</label><Input value={providerEdit.description} onChange={(e) => setProviderEdit({ ...providerEdit, description: e.target.value })} className="rounded-none h-10 font-mono text-sm bg-background border-border" /></div>
+                </div>
+                <label className="flex items-center gap-2 font-mono text-sm cursor-pointer"><input type="checkbox" checked={providerEdit.active} onChange={(e) => setProviderEdit({ ...providerEdit, active: e.target.checked })} />Activo</label>
+                <div className="flex gap-3">
+                  <Button onClick={() => handleSaveProvider(providerEdit)} className="rounded-none font-mono uppercase text-xs bg-primary text-white hover:bg-primary/80 border-none h-10"><Check className="h-4 w-4 mr-2" />Guardar</Button>
+                  <Button variant="outline" onClick={() => setProviderEdit(null)} className="rounded-none font-mono text-xs h-10 border-border">Cancelar</Button>
+                </div>
+              </div>
+            )}
+            <div className="border border-border">
+              {providers.map((p) => (
+                <div key={p.id} className="flex items-center justify-between px-4 py-3 border-b border-border last:border-0 gap-4">
+                  <div><p className="font-mono font-bold text-sm">{p.name}</p><p className="font-mono text-xs text-muted-foreground">{p.code} · {p.active ? <span className="text-emerald-500">Activo</span> : "Inactivo"}</p></div>
+                  <div className="flex gap-2">
+                    <button onClick={() => setProviderEdit({ ...p })} className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary"><Pencil className="h-3 w-3" /></button>
+                    <button onClick={() => p.id && handleDeleteProvider(p.id)} className="h-8 w-8 border border-border flex items-center justify-center hover:border-destructive hover:text-destructive"><Trash2 className="h-3 w-3" /></button>
                   </div>
                 </div>
               ))}

@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { ordersTable, orderItemsTable, cartItemsTable, productsTable, shippingMethodsTable, paymentMethodsTable, couponsTable } from "@workspace/db";
-import { eq, ilike, desc, or } from "drizzle-orm";
+import { ordersTable, orderItemsTable, cartItemsTable, productsTable, shippingMethodsTable, paymentMethodsTable, couponsTable, variantsTable, variantSizesTable } from "@workspace/db";
+import { eq, desc, sql, and } from "drizzle-orm";
+import { getProvider } from "../shipping";
+import { sendOrderNotification, sendOrderConfirmationToCustomer } from "../mail";
 
 const router = Router();
 
@@ -50,6 +52,31 @@ router.post("/", async (req, res) => {
   const cartItems = await db.select({ item: cartItemsTable, product: productsTable }).from(cartItemsTable).leftJoin(productsTable, eq(cartItemsTable.productId, productsTable.id)).where(eq(cartItemsTable.sessionId, sessionId));
   if (cartItems.length === 0) return res.status(400).json({ error: "Cart is empty" });
 
+  // Validate stock for all items
+  for (const r of cartItems) {
+    const item = r.item;
+    let availableStock = r.product?.stock ?? 0;
+    if (item.selectedSize && item.selectedColor) {
+      const [variant] = await db.select().from(variantsTable).where(
+        and(eq(variantsTable.productId, item.productId), eq(variantsTable.colorName, item.selectedColor))
+      );
+      if (variant) {
+        const [size] = await db.select().from(variantSizesTable).where(
+          and(eq(variantSizesTable.variantId, variant.id), eq(variantSizesTable.size, item.selectedSize))
+        );
+        if (size) availableStock = size.stock;
+      }
+    }
+    if (item.quantity > availableStock) {
+      return res.status(400).json({
+        error: `Stock insuficiente para "${r.product?.name ?? "producto"}". Disponible: ${availableStock}, solicitado: ${item.quantity}`,
+        productId: item.productId,
+        availableStock,
+        requestedQuantity: item.quantity,
+      });
+    }
+  }
+
   const subtotal = cartItems.reduce((s, r) => s + Number(r.item.price) * r.item.quantity, 0);
   let discount = 0;
 
@@ -66,7 +93,22 @@ router.post("/", async (req, res) => {
   let shippingCost = 0;
   if (shippingMethodId) {
     const [sm] = await db.select().from(shippingMethodsTable).where(eq(shippingMethodsTable.id, shippingMethodId));
-    if (sm) shippingCost = Number(sm.price);
+    if (sm) {
+      const provider = getProvider(sm.provider ?? "custom");
+      if (provider && postalCode) {
+        const weight = cartItems.reduce((s, r) => s + r.item.quantity, 0);
+        const quote = await provider.quote({
+          shippingMethodId: sm.id,
+          postalCode,
+          province: province ?? "",
+          weight,
+          subtotal,
+        }, sm.config ?? undefined);
+        shippingCost = quote.price;
+      } else {
+        shippingCost = Number(sm.price);
+      }
+    }
   }
 
   let paymentDiscount = 0;
@@ -104,9 +146,62 @@ router.post("/", async (req, res) => {
 
   await db.delete(cartItemsTable).where(eq(cartItemsTable.sessionId, sessionId));
 
-  const orderItems = await db.select().from(orderItemsTable).where(eq(orderItemsTable.orderId, order.id));
+  // Deduct stock for each item
+  for (const item of itemsToInsert) {
+    await db.update(productsTable)
+      .set({ stock: sql`GREATEST(0, ${productsTable.stock} - ${item.quantity})` })
+      .where(eq(productsTable.id, item.productId));
+
+    if (item.selectedSize && item.selectedColor) {
+      const [variant] = await db.select().from(variantsTable).where(
+        and(eq(variantsTable.productId, item.productId), eq(variantsTable.colorName, item.selectedColor))
+      );
+      if (variant) {
+        await db.update(variantSizesTable)
+          .set({ stock: sql`GREATEST(0, ${variantSizesTable.stock} - ${item.quantity})` })
+          .where(and(eq(variantSizesTable.variantId, variant.id), eq(variantSizesTable.size, item.selectedSize)));
+      }
+    }
+  }
+
+  // Send email notifications (non-blocking)
   const [pm] = paymentMethodId ? await db.select().from(paymentMethodsTable).where(eq(paymentMethodsTable.id, paymentMethodId)) : [null];
   const [sm] = shippingMethodId ? await db.select().from(shippingMethodsTable).where(eq(shippingMethodsTable.id, shippingMethodId)) : [null];
+  sendOrderNotification({
+    id: order.id,
+    firstName: order.firstName,
+    lastName: order.lastName,
+    email: order.email,
+    phone: order.phone,
+    address: order.address,
+    city: order.city,
+    province: order.province,
+    postalCode: order.postalCode,
+    subtotal,
+    discount: discount + paymentDiscount,
+    shippingCost,
+    total,
+    paymentMethodName: pm?.name ?? null,
+    shippingMethodName: sm?.name ?? null,
+    items: itemsToInsert.map((i) => ({
+      productName: i.productName,
+      quantity: i.quantity,
+      price: Number(i.price),
+      selectedSize: i.selectedSize,
+      selectedColor: i.selectedColor,
+    })),
+  });
+  sendOrderConfirmationToCustomer({
+    id: order.id,
+    firstName: order.firstName,
+    lastName: order.lastName,
+    email: order.email,
+    total,
+    paymentMethodName: pm?.name ?? null,
+    shippingMethodName: sm?.name ?? null,
+  });
+
+  const orderItems = await db.select().from(orderItemsTable).where(eq(orderItemsTable.orderId, order.id));
 
   res.status(201).json(buildOrder(order, orderItems, pm?.name, sm?.name));
 });
@@ -126,6 +221,20 @@ router.patch("/:id", async (req, res) => {
   const items = await db.select().from(orderItemsTable).where(eq(orderItemsTable.orderId, order.id));
   const [pm] = order.paymentMethodId ? await db.select().from(paymentMethodsTable).where(eq(paymentMethodsTable.id, order.paymentMethodId)) : [null];
   const [sm] = order.shippingMethodId ? await db.select().from(shippingMethodsTable).where(eq(shippingMethodsTable.id, order.shippingMethodId)) : [null];
+
+  // Send confirmation email when admin confirms order
+  if (req.body.status === "confirmado") {
+    const { sendOrderConfirmedToCustomer } = await import("../mail");
+    sendOrderConfirmedToCustomer({
+      id: order.id,
+      firstName: order.firstName,
+      lastName: order.lastName,
+      email: order.email,
+      paymentMethodName: pm?.name ?? null,
+      shippingMethodName: sm?.name ?? null,
+    });
+  }
+
   res.json(buildOrder(order, items, pm?.name, sm?.name));
 });
 

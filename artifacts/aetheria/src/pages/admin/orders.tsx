@@ -11,7 +11,7 @@ const STATUS_COLORS: Record<string, string> = {
   pendiente: "bg-yellow-500/20 text-yellow-500",
   confirmado: "bg-blue-500/20 text-blue-500",
   pagado: "bg-green-500/20 text-green-500",
-  enviado: "bg-purple-500/20 text-purple-500",
+  enviado: "bg-pink-400/20 text-pink-400",
   entregado: "bg-emerald-500/20 text-emerald-500",
   cancelado: "bg-destructive/20 text-destructive",
 };

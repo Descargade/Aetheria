@@ -7,9 +7,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Filter, Heart, Search, X } from "lucide-react";
+import { Filter, Search, X } from "lucide-react";
 import { useSession } from "@/hooks/use-session";
 import { useToast } from "@/hooks/use-toast";
+import { ProductCard } from "@/components/product/ProductCard";
 
 export function Shop() {
   const searchString = useSearch();
@@ -198,13 +199,13 @@ export function Shop() {
 
         <div className="flex items-center gap-3">
           {/* Search box */}
-          <form onSubmit={handleSearchSubmit} className="relative hidden sm:flex items-center border border-border bg-background focus-within:border-primary transition-colors h-9">
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center border border-border bg-background focus-within:border-primary transition-colors h-9 flex-1 sm:flex-initial max-w-xs">
             <Search className="h-4 w-4 ml-3 text-muted-foreground shrink-0" />
             <input
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Buscar en colección..."
-              className="bg-transparent px-3 text-sm font-mono outline-none placeholder:text-muted-foreground w-44"
+              placeholder="Buscar..."
+              className="bg-transparent px-2 sm:px-3 text-sm font-mono outline-none placeholder:text-muted-foreground w-full min-w-0"
             />
             {searchInput && (
               <button type="button" onClick={clearSearch} className="h-9 w-8 flex items-center justify-center hover:text-primary">
@@ -273,66 +274,23 @@ export function Shop() {
         {/* Product Grid */}
         <main className="flex-1">
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[1,2,3,4,5,6].map(i => (
                 <div key={i} className="aspect-[3/4] bg-muted animate-pulse border border-border" />
               ))}
             </div>
           ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {products.map((product) => {
                 const isFavorite = favorites?.some(f => f.productId === product.id);
                 return (
-                  <div key={product.id} className="group cursor-pointer relative">
-                    <Link href={`/producto/${product.id}`}>
-                      <div className="relative aspect-[3/4] bg-muted overflow-hidden mb-4 border border-border group-hover:border-primary/50 transition-colors">
-                        <img
-                          src={product.images?.[0] || PLACEHOLDER_IMAGE}
-                          alt={product.name}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                      </div>
-                      <div className="font-mono text-sm space-y-1">
-                        <div className="flex items-center gap-1.5 min-h-[18px]">
-                          {product.isNew && (
-                            <span className="bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wider leading-none">Nuevo</span>
-                          )}
-                          {product.salePrice && (
-                            <span className="bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wider leading-none">Sale</span>
-                          )}
-                        </div>
-                        <h3 className="font-bold truncate uppercase text-foreground group-hover:text-primary transition-colors">{product.name}</h3>
-                        <p className="text-muted-foreground text-xs truncate">{product.categoryName}</p>
-                        {(() => {
-                          const effPrice = Number(product.salePrice || product.price);
-                          const discPrice = calcDiscounted(effPrice);
-                          return (
-                            <div>
-                              {product.salePrice ? (
-                                <div className="flex items-baseline gap-2">
-                                  <span className="text-destructive font-bold text-base">${Number(product.salePrice).toLocaleString('es-AR')}</span>
-                                  <span className="text-muted-foreground line-through font-bold text-xs">${Number(product.price).toLocaleString('es-AR')}</span>
-                                </div>
-                              ) : (
-                                <span className="font-bold text-foreground">${Number(product.price).toLocaleString('es-AR')}</span>
-                              )}
-                              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
-                                <span>Transf. <span className="text-primary font-semibold">${discPrice.toLocaleString('es-AR')}</span></span>
-                                <span className="text-muted-foreground/40">/</span>
-                                <span>Efect. <span className="font-semibold text-foreground">${effPrice.toLocaleString('es-AR')}</span></span>
-                              </div>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </Link>
-                    <button
-                      className={`absolute top-4 right-4 h-8 w-8 flex items-center justify-center bg-background/60 backdrop-blur border border-border/50 hover:border-primary/60 transition-colors z-10 ${isFavorite ? 'text-primary border-primary/40' : 'text-foreground'}`}
-                      onClick={(e) => toggleFavorite(e, product.id)}
-                    >
-                      <Heart className="h-4 w-4" fill={isFavorite ? "currentColor" : "none"} />
-                    </button>
-                  </div>
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    showFavorite
+                    isFavorite={isFavorite}
+                    onToggleFavorite={toggleFavorite}
+                  />
                 );
               })}
             </div>
