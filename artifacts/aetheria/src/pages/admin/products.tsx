@@ -104,10 +104,7 @@ export function AdminProducts() {
         console.error("Sort failed:", err);
         return;
       }
-      queryClient.setQueryData(getGetProductsQueryKey(), (old: any[] | undefined) => {
-        if (!old) return old;
-        return reordered.map((p, i) => ({ ...old.find((x: any) => x.id === p.id) ?? p, sortOrder: i }));
-      });
+      await invalidate();
     } catch (err) {
       console.error("Sort fetch error:", err);
     } finally {
