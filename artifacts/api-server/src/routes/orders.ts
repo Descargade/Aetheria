@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { ordersTable, orderItemsTable, cartItemsTable, productsTable, shippingMethodsTable, paymentMethodsTable, couponsTable, variantsTable, variantSizesTable } from "@workspace/db";
 import { eq, desc, sql, and } from "drizzle-orm";
-import { sendOrderNotification, sendOrderConfirmationToCustomer } from "../mail";
+import { sendOrderNotification, sendOrderConfirmationToCustomer, sendOrderConfirmedToCustomer, sendOrderShippedToCustomer } from "../mail";
 
 const router = Router();
 
@@ -225,7 +225,6 @@ router.patch("/:id", async (req, res) => {
 
   // Send confirmation email when admin confirms order
   if (req.body.status === "confirmado") {
-    const { sendOrderConfirmedToCustomer } = await import("../mail");
     sendOrderConfirmedToCustomer({
       id: order.id,
       firstName: order.firstName,
@@ -238,7 +237,6 @@ router.patch("/:id", async (req, res) => {
 
   // Send shipped email when admin marks as enviado
   if (req.body.status === "enviado") {
-    const { sendOrderShippedToCustomer } = await import("../mail");
     sendOrderShippedToCustomer({
       id: order.id,
       firstName: order.firstName,
