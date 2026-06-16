@@ -90,7 +90,6 @@ export function Cart() {
                     <p className="font-mono font-bold text-sm mt-2">${Number(item.price).toLocaleString("es-AR")}</p>
                     {isOutOfStock && <p className="text-destructive font-mono text-xs mt-1">Sin stock</p>}
                   </div>
-                  </div>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center border border-border h-9">
                       <button
