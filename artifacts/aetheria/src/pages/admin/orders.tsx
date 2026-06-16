@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, Trash2 } from "lucide-react";
 
 const STATUSES = ["pendiente","confirmado","pagado","enviado","entregado","cancelado"];
 const STATUS_COLORS: Record<string, string> = {
@@ -29,6 +29,12 @@ export function AdminOrders() {
     updateStatus.mutate({ id: orderId, data: { status: status as any } }, {
       onSuccess: () => queryClient.invalidateQueries({ queryKey: getGetOrdersQueryKey() })
     });
+  };
+
+  const handleDelete = async (orderId: number) => {
+    if (!confirm("¿Eliminar pedido cancelado?")) return;
+    await fetch(`/api/orders/${orderId}`, { method: "DELETE" });
+    queryClient.invalidateQueries({ queryKey: getGetOrdersQueryKey() });
   };
 
   return (
@@ -74,6 +80,11 @@ export function AdminOrders() {
                       {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
+                  {order.status === "cancelado" && (
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(order.id); }} title="Eliminar" className="h-7 w-7 border border-border flex items-center justify-center hover:border-destructive hover:text-destructive transition-colors ml-2">
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  )}
                   <span className="font-mono text-xs text-muted-foreground hidden md:block">{new Date(order.createdAt).toLocaleDateString("es-AR")}</span>
                 </div>
                 {expandedId === order.id && (

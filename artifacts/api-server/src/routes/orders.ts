@@ -250,4 +250,13 @@ router.patch("/:id", async (req, res) => {
   res.json(buildOrder(order, items, pm?.name, sm?.name));
 });
 
+router.delete("/:id", async (req, res) => {
+  const orderId = Number(req.params.id);
+  const [order] = await db.select().from(ordersTable).where(eq(ordersTable.id, orderId));
+  if (!order) return res.status(404).json({ error: "Not found" });
+  await db.delete(orderItemsTable).where(eq(orderItemsTable.orderId, orderId));
+  await db.delete(ordersTable).where(eq(ordersTable.id, orderId));
+  res.status(204).send();
+});
+
 export default router;
