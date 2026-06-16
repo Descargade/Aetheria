@@ -96,6 +96,16 @@ router.post("/", async (req, res) => {
   res.status(201).json(buildProduct(row));
 });
 
+router.patch("/sort-order", async (req, res) => {
+  await ensureSortColumn();
+  const { items } = req.body as { items: { id: number; sortOrder: number }[] };
+  if (!Array.isArray(items)) return res.status(400).json({ error: "items array required" });
+  for (const item of items) {
+    await db.update(productsTable).set({ sortOrder: item.sortOrder }).where(eq(productsTable.id, item.id));
+  }
+  res.json({ success: true });
+});
+
 router.get("/:id", async (req, res) => {
   const [row] = await db
     .select({ product: productsTable, categoryName: categoriesTable.name })
@@ -155,16 +165,6 @@ router.post("/:id/variants", async (req, res) => {
 
   const [variant] = await db.insert(variantsTable).values(parsed.data).returning();
   res.status(201).json({ ...variant, images: [], sizes: [] });
-});
-
-router.patch("/sort-order", async (req, res) => {
-  await ensureSortColumn();
-  const { items } = req.body as { items: { id: number; sortOrder: number }[] };
-  if (!Array.isArray(items)) return res.status(400).json({ error: "items array required" });
-  for (const item of items) {
-    await db.update(productsTable).set({ sortOrder: item.sortOrder }).where(eq(productsTable.id, item.id));
-  }
-  res.json({ success: true });
 });
 
 export default router;
