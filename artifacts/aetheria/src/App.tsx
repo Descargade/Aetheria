@@ -19,6 +19,7 @@ import { Checkout } from "@/pages/checkout";
 import { OrderConfirmation } from "@/pages/order-confirmation";
 import { Favorites } from "@/pages/favorites";
 import { Contact } from "@/pages/contact";
+import { Arrepentimiento } from "@/pages/arrepentimiento";
 
 // Admin Pages
 import { AdminLogin } from "@/pages/admin/login";
@@ -75,6 +76,9 @@ function Router() {
       </Route>
       <Route path="/contacto">
         <MainLayout><Contact /></MainLayout>
+      </Route>
+      <Route path="/arrepentimiento">
+        <MainLayout><Arrepentimiento /></MainLayout>
       </Route>
 
       {/* Admin Routes */}

@@ -6,7 +6,7 @@ import { VariantManager } from "@/components/admin/VariantManager";
 import { ImageUploader } from "@/components/ui/image-uploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, Trash2, Search, X, Check, Layers } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, X, Check, Layers, ChevronUp, ChevronDown } from "lucide-react";
 
 type ProductForm = {
   name: string; sku: string; shortDescription: string; description: string;
@@ -75,6 +75,25 @@ export function AdminProducts() {
     setVariantProductId(id);
     setVariantProductName(name);
     setShowForm(false);
+  };
+
+  const sortedProducts = [...(products ?? [])].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+
+  const handleMove = async (productId: number, direction: "up" | "down") => {
+    const idx = sortedProducts.findIndex((p) => p.id === productId);
+    if (idx < 0) return;
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sortedProducts.length) return;
+    const a = sortedProducts[idx];
+    const b = sortedProducts[swapIdx];
+    const aOrder = a.sortOrder ?? 0;
+    const bOrder = b.sortOrder ?? 0;
+    await fetch("/api/products/sort-order", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: [{ id: a.id, sortOrder: bOrder }, { id: b.id, sortOrder: aOrder }] }),
+    });
+    invalidate();
   };
 
   const field = (label: string, input: React.ReactNode) => (
@@ -157,7 +176,7 @@ export function AdminProducts() {
             <span>Nombre</span><span>Categoría</span><span>Precio</span><span>Stock</span><span>Estado</span><span></span>
           </div>
           {isLoading && <div className="p-8 text-center"><div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" /></div>}
-          {products?.map((p) => (
+          {sortedProducts.map((p) => (
             <div key={p.id} className="grid grid-cols-2 md:grid-cols-[2fr_1fr_100px_100px_100px_100px] gap-4 px-4 py-3 border-b border-border last:border-0 items-center">
               <div>
                 <p className="font-mono font-bold text-sm">{p.name}</p>
@@ -171,6 +190,12 @@ export function AdminProducts() {
               <span className={`font-mono text-xs font-bold hidden md:block ${(p.stock ?? 0) === 0 ? "text-destructive" : (p.stock ?? 0) <= 5 ? "text-yellow-500" : "text-foreground"}`}>{p.stock ?? 0} u.</span>
               <span className={`font-mono text-xs hidden md:block ${p.active ? "text-emerald-500" : "text-muted-foreground"}`}>{p.active ? "Activo" : "Inactivo"}</span>
               <div className="flex gap-1.5 justify-end">
+                <button onClick={() => handleMove(p.id, "up")} title="Mover arriba" className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary transition-colors">
+                  <ChevronUp className="h-3 w-3" />
+                </button>
+                <button onClick={() => handleMove(p.id, "down")} title="Mover abajo" className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary transition-colors">
+                  <ChevronDown className="h-3 w-3" />
+                </button>
                 <button onClick={() => openVariants(p.id, p.name)} title="Variantes" className="h-8 w-8 border border-border flex items-center justify-center hover:border-primary transition-colors">
                   <Layers className="h-3 w-3" />
                 </button>

@@ -59,6 +59,7 @@ export interface Product {
   sizes?: string[];
   colors?: string[];
   stock?: number;
+  sortOrder?: number;
   featured?: boolean;
   isNew?: boolean;
   active?: boolean;

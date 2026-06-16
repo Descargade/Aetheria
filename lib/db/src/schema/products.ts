@@ -15,6 +15,7 @@ export const productsTable = pgTable("products", {
   sizes: text("sizes").array().notNull().default([]),
   colors: text("colors").array().notNull().default([]),
   stock: integer("stock").notNull().default(0),
+  sortOrder: integer("sort_order").notNull().default(0),
   featured: boolean("featured").notNull().default(false),
   isNew: boolean("is_new").notNull().default(false),
   active: boolean("active").notNull().default(true),

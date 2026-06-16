@@ -16,6 +16,7 @@ import sizeGuidesRouter from "./size-guides";
 import authRouter from "./auth";
 import bannerRouter from "./banner";
 import storeConfigRouter from "./store-config";
+import cancellationsRouter from "./cancellations";
 
 const router: IRouter = Router();
 
@@ -36,5 +37,6 @@ router.use("/admin", adminRouter);
 router.use("/variants", variantsRouter);
 router.use("/size-guides", sizeGuidesRouter);
 router.use("/store-config", storeConfigRouter);
+router.use("/cancellations", cancellationsRouter);
 
 export default router;

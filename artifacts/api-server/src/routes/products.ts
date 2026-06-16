@@ -9,6 +9,15 @@ import { eq, and, gte, lte, ilike, isNotNull, sql, asc } from "drizzle-orm";
 
 const router = Router();
 
+let sortColumnEnsured = false;
+async function ensureSortColumn() {
+  if (sortColumnEnsured) return;
+  try {
+    await db.execute(sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INTEGER NOT NULL DEFAULT 0`);
+    sortColumnEnsured = true;
+  } catch {}
+}
+
 function buildProduct(p: typeof productsTable.$inferSelect, categoryName?: string | null) {
   return {
     ...p,
@@ -49,6 +58,7 @@ router.get("/on-sale", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
+  await ensureSortColumn();
   const { categoryId, search, minPrice, maxPrice, color, size, inStock, onSale, featured, isNew } = req.query;
   const conditions: ReturnType<typeof eq>[] = [eq(productsTable.active, true)];
 
@@ -67,7 +77,7 @@ router.get("/", async (req, res) => {
     .from(productsTable)
     .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
     .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(productsTable.createdAt);
+    .orderBy(productsTable.sortOrder, productsTable.createdAt);
 
   let results = rows.map((r) => buildProduct(r.product, r.categoryName));
 
@@ -145,6 +155,16 @@ router.post("/:id/variants", async (req, res) => {
 
   const [variant] = await db.insert(variantsTable).values(parsed.data).returning();
   res.status(201).json({ ...variant, images: [], sizes: [] });
+});
+
+router.patch("/sort-order", async (req, res) => {
+  await ensureSortColumn();
+  const { items } = req.body as { items: { id: number; sortOrder: number }[] };
+  if (!Array.isArray(items)) return res.status(400).json({ error: "items array required" });
+  for (const item of items) {
+    await db.update(productsTable).set({ sortOrder: item.sortOrder }).where(eq(productsTable.id, item.id));
+  }
+  res.json({ success: true });
 });
 
 export default router;

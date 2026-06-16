@@ -35,12 +35,11 @@ export function Footer() {
             <span className="flex items-center gap-1 bg-muted/50 border border-border px-2 py-1 text-xs font-mono"><CreditCard className="h-3 w-3" /> Mastercard</span>
             <span className="flex items-center gap-1 bg-muted/50 border border-border px-2 py-1 text-xs font-mono"><Banknote className="h-3 w-3" /> MP</span>
             <span className="flex items-center gap-1 bg-muted/50 border border-border px-2 py-1 text-xs font-mono"><Building2 className="h-3 w-3" /> Transferencia</span>
+            <span className="flex items-center gap-1 bg-muted/50 border border-border px-2 py-1 text-xs font-mono"><Banknote className="h-3 w-3" /> Efectivo</span>
           </div>
           <h4 className="font-semibold text-sm tracking-widest uppercase text-foreground mt-2">Medios de envío</h4>
           <div className="flex flex-wrap gap-2">
             <span className="flex items-center gap-1 bg-muted/50 border border-border px-2 py-1 text-xs font-mono"><Truck className="h-3 w-3" /> Correo Argentino</span>
-            <span className="flex items-center gap-1 bg-muted/50 border border-border px-2 py-1 text-xs font-mono"><Truck className="h-3 w-3" /> Andreani</span>
-            <span className="flex items-center gap-1 bg-muted/50 border border-border px-2 py-1 text-xs font-mono"><Truck className="h-3 w-3" /> OCA</span>
           </div>
         </div>
 
@@ -49,7 +48,7 @@ export function Footer() {
           <ul className="flex flex-col gap-2 text-sm text-muted-foreground">
             <li><span className="cursor-pointer hover:text-primary transition-colors">Términos y Condiciones</span></li>
             <li><span className="cursor-pointer hover:text-primary transition-colors">Política de Privacidad</span></li>
-            <li><span className="cursor-pointer hover:text-primary transition-colors">Botón de arrepentimiento</span></li>
+            <li><Link href="/arrepentimiento" className="hover:text-primary transition-colors">Botón de arrepentimiento</Link></li>
             <li><span className="cursor-pointer hover:text-primary transition-colors">Guía de Talles</span></li>
           </ul>
           <h4 className="font-semibold text-sm tracking-widest uppercase text-foreground mt-2">Social</h4>

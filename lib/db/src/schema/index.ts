@@ -12,3 +12,4 @@ export * from "./size_guides";
 export * from "./users";
 export * from "./banner";
 export * from "./store-config";
+export * from "./cancellations";
