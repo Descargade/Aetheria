@@ -28,31 +28,37 @@ function buildProduct(p: typeof productsTable.$inferSelect, categoryName?: strin
 }
 
 router.get("/featured", async (req, res) => {
+  await ensureSortColumn();
   const rows = await db
     .select({ product: productsTable, categoryName: categoriesTable.name })
     .from(productsTable)
     .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
     .where(and(eq(productsTable.featured, true), eq(productsTable.active, true)))
+    .orderBy(productsTable.sortOrder, productsTable.createdAt)
     .limit(12);
   res.json(rows.map((r) => buildProduct(r.product, r.categoryName)));
 });
 
 router.get("/new-arrivals", async (req, res) => {
+  await ensureSortColumn();
   const rows = await db
     .select({ product: productsTable, categoryName: categoriesTable.name })
     .from(productsTable)
     .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
     .where(and(eq(productsTable.isNew, true), eq(productsTable.active, true)))
+    .orderBy(productsTable.sortOrder, productsTable.createdAt)
     .limit(12);
   res.json(rows.map((r) => buildProduct(r.product, r.categoryName)));
 });
 
 router.get("/on-sale", async (req, res) => {
+  await ensureSortColumn();
   const rows = await db
     .select({ product: productsTable, categoryName: categoriesTable.name })
     .from(productsTable)
     .leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id))
     .where(and(isNotNull(productsTable.salePrice), eq(productsTable.active, true)))
+    .orderBy(productsTable.sortOrder, productsTable.createdAt)
     .limit(20);
   res.json(rows.map((r) => buildProduct(r.product, r.categoryName)));
 });
